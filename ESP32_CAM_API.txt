@@ -1,0 +1,21 @@
+adjust frame size
+<ip_addr>/esp32_cam_control?var=framesize&val=6
+
+start streaming
+<ip_addr>:81/esp32_cam_stream
+
+single shot
+<ip_addr>/esp32_cam_capture
+
+flash light
+<ip_addr>/esp32_cam_control?var=flash&val=1
+<ip_addr>/esp32_cam_control?var=flash&val=0
+
+mirror
+<ip_addr>/esp32_cam_control?var=hmirror&val=0
+<ip_addr>/esp32_cam_control?var=hmirror&val=1
+<ip_addr>/esp32_cam_control?var=vflip&val=0
+<ip_addr>/esp32_cam_control?var=vflip&val=1
+
+identify ESP32
+<ip_addr>/who_are_you

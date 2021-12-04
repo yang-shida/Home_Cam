@@ -1,0 +1,21 @@
+<!-- http://192.168.1.108:81/esp32_cam_stream -->
+<!-- `http://192.168.1.108/esp32_cam_capture?cb=${new Date().getTime()}` -->
+
+<img id="display">
+
+<script>
+    var intervalID = window.setInterval(myCallback, 100);
+    var image = document.getElementById("display");
+
+    function myCallback() {
+        fetch(`http://192.168.1.108/esp32_cam_capture?cb=${new Date().getTime()}`)
+        .then((res)=>{
+            return res.blob()
+        })
+        .then(imageBlob=>{
+            const imageObjectURL = URL.createObjectURL(imageBlob);
+            image.src=imageObjectURL
+        })
+    }
+</script>
+

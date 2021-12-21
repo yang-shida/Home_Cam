@@ -4,17 +4,33 @@
 <img id="display">
 
 <script>
-    var intervalID = window.setInterval(myCallback, 100);
-    var image = document.getElementById("display");
+    const CAM_IP = "http://192.168.1.108"
+
+    var intervalID
+    var image
+    var lastURL
+
+    fetch(`${CAM_IP}/esp32_cam_control?var=framesize&val=10`)
+    .then(()=>{
+        intervalID = window.setInterval(myCallback, 100);
+        image = document.getElementById("display");
+    })
+    
+
+
 
     function myCallback() {
-        fetch(`http://192.168.1.108/esp32_cam_capture?cb=${new Date().getTime()}`)
+        fetch(`${CAM_IP}/esp32_cam_capture?cb=${new Date().getTime()}`)
         .then((res)=>{
             return res.blob()
         })
         .then(imageBlob=>{
             const imageObjectURL = URL.createObjectURL(imageBlob);
             image.src=imageObjectURL
+            lastURL=imageObjectURL
+        })
+        .catch((err)=>{
+            image.src=lastURL
         })
     }
 </script>

@@ -15,8 +15,11 @@
 
 #include "camera_pins.h"
 
-const char* ssid = "TP-LINK_2C56";
-const char* password = "cici1616";
+//const char* ssid = "TP-LINK_2C56";
+//const char* password = "cici1616";
+
+const char* ssid = "YANG";
+const char* password = "417645885";
 
 uint8_t dis_count = 0;
 
@@ -24,6 +27,7 @@ void startCameraServer();
 
 void setup() {
   Serial.begin(115200);
+  
   Serial.setDebugOutput(true);
   Serial.println();
 

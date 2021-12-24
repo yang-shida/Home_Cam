@@ -1,0 +1,7 @@
+ESP32:
+    - in setup, generate a http request to backend to ask for current setting
+    - assign an ID to the camera (can use MAC address)
+
+Frontend:
+
+Backend:

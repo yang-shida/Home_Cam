@@ -53,6 +53,9 @@ namespace Home_Cam_Backend
             foreach(Esp32Cam cam in list)
             {
                 Console.WriteLine(cam.IpAddr);
+                await cam.AdjustFrameSize(10);
+                byte[] imageArray = await cam.GetSingleShot();
+                File.WriteAllBytes($"D:/Download/{cam.IpAddr}.jpg", imageArray);
             }
 
 

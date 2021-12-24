@@ -4,13 +4,13 @@
 <img id="display">
 
 <script>
-    const CAM_IP = "http://192.168.1.108"
+    const CAM_IP = "http://192.168.50.197"
 
     var intervalID
     var image
     var lastURL
 
-    fetch(`${CAM_IP}/esp32_cam_control?var=framesize&val=10`)
+    fetch(`${CAM_IP}/esp32_cam_control?var=framesize&val=7`)
     .then(()=>{
         intervalID = window.setInterval(myCallback, 100);
         image = document.getElementById("display");

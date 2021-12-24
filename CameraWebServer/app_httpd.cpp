@@ -547,6 +547,18 @@ static esp_err_t cmd_handler(httpd_req_t *req){
         return httpd_resp_send_500(req);
     }
 
+    camera_fb_t * fb = NULL;
+    fb = esp_camera_fb_get();
+    esp_camera_fb_return(fb);
+    fb = esp_camera_fb_get();
+    esp_camera_fb_return(fb);
+    fb = esp_camera_fb_get();
+    esp_camera_fb_return(fb);
+    fb = esp_camera_fb_get();
+    esp_camera_fb_return(fb);
+    fb = esp_camera_fb_get();
+    esp_camera_fb_return(fb);
+
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
     return httpd_resp_send(req, NULL, 0);
 }

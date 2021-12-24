@@ -454,9 +454,12 @@ static esp_err_t stream_handler(httpd_req_t *req){
 static esp_err_t id_handler(httpd_req_t *req) {
     httpd_resp_set_type(req, "text/html");
     httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    char res_str[] = "ESP32\0";
-    return httpd_resp_send(req, (const char *)res_str, 6);
-    
+    char macStr[18];
+    byte array[6];
+    WiFi.macAddress(array);
+    snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x", array[0], array[1], array[2], array[3], array[4], array[5]);
+    std::string res_str = "ESP32="+std::string(macStr);
+    return httpd_resp_send(req, (const char *)res_str.c_str(), res_str.length());
 }
 
 static esp_err_t cmd_handler(httpd_req_t *req){

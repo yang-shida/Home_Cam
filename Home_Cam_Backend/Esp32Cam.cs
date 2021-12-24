@@ -116,9 +116,9 @@ namespace Home_Cam_Backend
                     if (idResult.StatusCode.ToString() == "OK")
                     {
                         string responseString = await idResult.Content.ReadAsStringAsync();
-                        if (responseString == "ESP32\0")
+                        if (responseString.StartsWith("ESP32="))
                         {
-                            cameraList.Add(new(ipAddr, "cam1"));
+                            cameraList.Add(new(ipAddr, responseString.Substring(6)));
                         }
                     }
                 }

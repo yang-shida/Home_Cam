@@ -52,12 +52,11 @@ namespace Home_Cam_Backend
             List<Esp32Cam> list = await Esp32Cam.FindCameras();
             foreach(Esp32Cam cam in list)
             {
-                Console.WriteLine(cam.IpAddr);
-                await cam.AdjustFrameSize(10);
-                byte[] imageArray = await cam.GetSingleShot();
-                File.WriteAllBytes($"D:/Download/{cam.IpAddr}.jpg", imageArray);
+                Console.WriteLine($"{cam.IpAddr}={cam.UniqueId}");
+                // await cam.AdjustFrameSize(10);
+                // byte[] imageArray = await cam.GetSingleShot();
+                // File.WriteAllBytes($"D:/Download/{cam.IpAddr}.jpg", imageArray);
             }
-
 
             // CreateHostBuilder(args).Build().Run();
         }

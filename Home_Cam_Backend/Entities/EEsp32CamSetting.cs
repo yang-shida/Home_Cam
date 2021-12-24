@@ -2,6 +2,7 @@ namespace Home_Cam_Backend.Entities
 {
     public class EEsp32CamSetting
     {
+        public string UniqueId { get; init; }   // MAC address of camera
         public string Location { get; set; }
         public int FrameSize { get; set; }
         public bool FlashLightOn { get; set; }

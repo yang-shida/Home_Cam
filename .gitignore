@@ -287,3 +287,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+Home_Cam_Backend/MongoDB/*

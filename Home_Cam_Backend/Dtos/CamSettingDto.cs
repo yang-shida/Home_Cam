@@ -1,9 +1,6 @@
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace Home_Cam_Backend.Entities
+namespace Home_Cam_Backend.Dtos
 {
-    [BsonIgnoreExtraElements]
-    public record EEsp32CamSetting
+    public record CamSettingDto
     {
         public string UniqueId { get; init; }   // MAC address of camera
         public string Location { get; init; }

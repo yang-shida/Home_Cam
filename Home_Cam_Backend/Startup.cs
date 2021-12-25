@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Home_Cam_Backend.Repositories;
+using Home_Cam_Backend.Settings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 
 namespace Home_Cam_Backend
 {
@@ -26,6 +29,15 @@ namespace Home_Cam_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddSingleton<ICamSettingsRepository, MongoDbCamSettingsRepository>();
+
+            services.AddSingleton<IMongoClient>(ServiceProvider => 
+            {
+                var settings = Configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
+                // var settings = Configuration.GetSection("MongoDbSettings").Get<MongoDbSettings>();
+                return new MongoClient(settings.ConnectionString);
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

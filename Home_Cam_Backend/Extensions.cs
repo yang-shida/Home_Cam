@@ -4,6 +4,9 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Home_Cam_Backend.Controllers;
+using Home_Cam_Backend.Dtos;
+using Home_Cam_Backend.Entities;
 
 namespace Home_Cam_Backend
 {
@@ -80,6 +83,28 @@ namespace Home_Cam_Backend
             }
 
             return Task.FromResult(ipList);
+        }
+
+        public static CamSettingDto AsDto(this EEsp32CamSetting camSetting)
+        {
+            return new CamSettingDto
+            {
+                UniqueId=camSetting.UniqueId,
+                Location=camSetting.Location,
+                FrameSize=camSetting.FrameSize,
+                FlashLightOn=camSetting.FlashLightOn,
+                HorizontalMirror=camSetting.HorizontalMirror,
+                VerticalMirror=camSetting.VerticalMirror
+            };
+        }
+
+        public static CamDto AsDto(this Esp32Cam cam)
+        {
+            return new CamDto
+            {
+                IpAddr=cam.IpAddr,
+                UniqueId=cam.UniqueId
+            };
         }
     }
 }

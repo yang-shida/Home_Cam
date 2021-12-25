@@ -10,7 +10,7 @@
     var image
     var lastURL
 
-    fetch(`${CAM_IP}/esp32_cam_control?var=framesize&val=7`)
+    fetch(`${CAM_IP}/esp32_cam_control?var=framesize&val=9`)
     .then(()=>{
         intervalID = window.setInterval(myCallback, 100);
         image = document.getElementById("display");

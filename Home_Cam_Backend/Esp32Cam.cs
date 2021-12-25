@@ -6,16 +6,16 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Home_Cam_Backend.Entities;
 
 namespace Home_Cam_Backend
 {
     public class Esp32Cam
     {
         public string IpAddr { get; set; }
-        public string Location { get; set; }
         public string UniqueId { get; init; }
         private HttpClient httpClient = new();
-        public Esp32Cam(string ip, string id, string location = "Default Location")
+        public Esp32Cam(string ip, string id)
         {
             IpAddr = ip;
             UniqueId = id;
@@ -29,7 +29,7 @@ namespace Home_Cam_Backend
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw new Exception("Cannot talk to camera!");
+                throw new Exception("[AdjustFrameSize] Cannot talk to camera!");
             }
         }
 
@@ -42,7 +42,7 @@ namespace Home_Cam_Backend
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw new Exception("Cannot talk to camera!");
+                throw new Exception("[TurnOnFlash] Cannot talk to camera!");
             }
         }
 
@@ -57,7 +57,7 @@ namespace Home_Cam_Backend
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw new Exception("Cannot talk to camera!");
+                throw new Exception("[HorizontalMirror] Cannot talk to camera!");
             }
         }
 
@@ -70,7 +70,7 @@ namespace Home_Cam_Backend
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw new Exception("Cannot talk to camera!");
+                throw new Exception("[VerticalMirror] Cannot talk to camera!");
             }
         }
 
@@ -85,10 +85,24 @@ namespace Home_Cam_Backend
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw new Exception("Cannot talk to camera!");
+                throw new Exception("[GetSingleShot] Cannot talk to camera!");
             }
         }
 
+        public async Task UpdateAllSettings(EEsp32CamSetting camSetting)
+        {
+            try
+            {
+                await AdjustFrameSize(camSetting.FrameSize);
+                await TurnOnFlash(camSetting.FlashLightOn);
+                await HorizontalMirror(camSetting.HorizontalMirror);
+                await VerticalMirror(camSetting.VerticalMirror);
+            }
+            catch(Exception e)
+            {
+                throw e;
+            }
+        }
         public static async Task<List<Esp32Cam>> FindCameras()
         {
             // find gateway address and subnet mask

@@ -48,7 +48,7 @@ namespace Home_Cam_Backend
             return oct;
         }
 
-        public static Task<List<string>> getListOfSubnetIpAddresses()
+        public static Task<List<string>> getListOfSubnetIpAddresses(bool withBroadcastingAddress)
         {
             List<string> ipList = new();
 
@@ -65,6 +65,10 @@ namespace Home_Cam_Backend
             {
                 minIpAddr[i]=gatewayOct[i]&subnetOct[i];
                 maxIpAddr[i]=minIpAddr[i]+(~subnetOct[i]&0xFF);
+                if(!withBroadcastingAddress && i==3)
+                {
+                    maxIpAddr[3]-=1;
+                }
             }
             int count=0;
             int[] currIp = new int[4];

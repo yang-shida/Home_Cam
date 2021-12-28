@@ -24,41 +24,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CamDto>>> GetActiveCameras()
         {
-            List<Esp32Cam> camList = await Esp32Cam.FindCameras();
-
-            foreach(Esp32Cam cam in camList)
-            {
-                // if camera is not in the active list
-                if(ActiveCameras.Find(camInList=>camInList.UniqueId==cam.UniqueId) is null)
-                {
-                    var camSetting = await repository.GetCamSettingAsync(cam.UniqueId);
-                    // if the camera's setting is in the database
-                    if(camSetting is not null)
-                    {
-                        // update the camera's setting
-                        await cam.UpdateAllSettings(camSetting);
-                    }
-                    // camera's setting is not in the databse
-                    else
-                    {
-                        // create a default camera setting and update the camera setting
-                        camSetting = new()
-                        {
-                            UniqueId=cam.UniqueId,
-                            Location="Default Location",
-                            FrameSize=6,
-                            FlashLightOn=false,
-                            HorizontalMirror=false,
-                            VerticalMirror=false
-                        };
-                        await cam.UpdateAllSettings(camSetting);
-                        await repository.CreateCamSettingAsync(camSetting);
-                    }
-
-                    // add the camera to active list
-                    ActiveCameras.Add(cam);
-                }
-            }
+            List<Esp32Cam> camList = await Esp32Cam.FindCameras(repository);
 
             return ActiveCameras.Select(cam=>cam.AsDto()).ToList();
         }

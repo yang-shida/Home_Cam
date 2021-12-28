@@ -22,10 +22,10 @@ namespace Home_Cam_Backend.Repositories
             await camSettingsCollection.InsertOneAsync(setting);
         }
 
-        public async Task DeleteCamSettingAsync(string camId)
-        {
-            throw new System.NotImplementedException();
-        }
+        // public async Task DeleteCamSettingAsync(string camId)
+        // {
+        //     throw new System.NotImplementedException();
+        // }
 
         public async Task<EEsp32CamSetting> GetCamSettingAsync(string camId)
         {

@@ -44,10 +44,12 @@ namespace Home_Cam_Backend
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Home_Cam_Backend", Version = "v1" });
             });
+
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, ICamSettingsRepository repository)
         {
             if (env.IsDevelopment())
             {
@@ -66,6 +68,8 @@ namespace Home_Cam_Backend
             {
                 endpoints.MapControllers();
             });
+
+            await Esp32Cam.FindCameras(repository);
         }
     }
 }

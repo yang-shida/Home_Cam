@@ -21,18 +21,8 @@ namespace Home_Cam_Backend
 {
     public class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            
-            // List<Esp32Cam> list = await Esp32Cam.FindCameras();
-            // foreach(Esp32Cam cam in list)
-            // {
-            //     Console.WriteLine($"{cam.IpAddr}={cam.UniqueId}");
-            //     // await cam.AdjustFrameSize(10);
-            //     // byte[] imageArray = await cam.GetSingleShot();
-            //     // File.WriteAllBytes($"D:/Download/{cam.IpAddr}.jpg", imageArray);
-            // }
-
             CreateHostBuilder(args).Build().Run();
         }
 

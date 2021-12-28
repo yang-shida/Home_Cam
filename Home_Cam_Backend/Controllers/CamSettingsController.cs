@@ -21,9 +21,21 @@ namespace Home_Cam_Backend.Controllers
         public async Task<ActionResult<CamSettingDto>> GetCamSettingAsync(string uniqueId, string ipAddr=null)
         {
             // request comes from a camera, add it to ActiveCameras list if is not in the list
-            if(ipAddr is not null && CamController.ActiveCameras.Find(camInList => camInList.UniqueId==uniqueId) is null)
+            if(ipAddr is not null)
             {
-                CamController.ActiveCameras.Add(new Esp32Cam(ipAddr, uniqueId));
+                if(CamController.ActiveCameras.Find(camInList => camInList.UniqueId==uniqueId) is null)
+                {
+                    CamController.ActiveCameras.Add(new Esp32Cam(ipAddr, uniqueId));
+                }
+                else
+                {
+                    int camIndex = CamController.ActiveCameras.IndexOf(CamController.ActiveCameras.Find(camInList => camInList.UniqueId==uniqueId));
+                    if(CamController.ActiveCameras[camIndex].IpAddr != ipAddr)
+                    {
+                        CamController.ActiveCameras[camIndex].IpAddr = ipAddr;
+                    }
+                }
+                
             }
 
             var camSetting = await repository.GetCamSettingAsync(uniqueId);

@@ -6,7 +6,10 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Home_Cam_Backend.Controllers;
 using Home_Cam_Backend.Entities;
+using Home_Cam_Backend.Repositories;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Home_Cam_Backend
 {
@@ -91,22 +94,15 @@ namespace Home_Cam_Backend
 
         public async Task UpdateAllSettings(EEsp32CamSetting camSetting)
         {
-            try
-            {
-                await AdjustFrameSize(camSetting.FrameSize);
-                await TurnOnFlash(camSetting.FlashLightOn);
-                await HorizontalMirror(camSetting.HorizontalMirror);
-                await VerticalMirror(camSetting.VerticalMirror);
-            }
-            catch(Exception e)
-            {
-                throw e;
-            }
+            await AdjustFrameSize(camSetting.FrameSize);
+            await TurnOnFlash(camSetting.FlashLightOn);
+            await HorizontalMirror(camSetting.HorizontalMirror);
+            await VerticalMirror(camSetting.VerticalMirror);
         }
-        public static async Task<List<Esp32Cam>> FindCameras()
+        public static async Task<List<Esp32Cam>> FindCameras(ICamSettingsRepository repository)
         {
             // find gateway address and subnet mask
-            List<string> ipAddrList = await Home_Cam_Backend.Extensions.getListOfSubnetIpAddresses();
+            List<string> ipAddrList = await Home_Cam_Backend.Extensions.getListOfSubnetIpAddresses(false);
 
             List<Esp32Cam> cameraList = new();
             HttpClient client = new();
@@ -132,17 +128,52 @@ namespace Home_Cam_Backend
                         string responseString = await idResult.Content.ReadAsStringAsync();
                         if (responseString.StartsWith("ESP32="))
                         {
-                            cameraList.Add(new(ipAddr, responseString.Substring(6)));
+                            // var cam = ActivatorUtilities.CreateInstance<Esp32Cam>((new ServiceCollection()).BuildServiceProvider(),ipAddr, responseString.Substring(6));
+                            var cam = new Esp32Cam(ipAddr, responseString.Substring(6));
+                            if(CamController.ActiveCameras.Find(camInList=>camInList.UniqueId==cam.UniqueId) is null)
+                            {
+                                cameraList.Add(cam);
+                                
+                                var camSetting = await repository.GetCamSettingAsync(cam.UniqueId);
+                                // if the camera's setting is in the database
+                                if(camSetting is not null)
+                                {
+                                    // update the camera's setting
+                                    await cam.UpdateAllSettings(camSetting);
+                                }
+                                // camera's setting is not in the databse
+                                else
+                                {
+                                    // create a default camera setting and update the camera setting
+                                    camSetting = new()
+                                    {
+                                        UniqueId=cam.UniqueId,
+                                        Location="Default Location",
+                                        FrameSize=6,
+                                        FlashLightOn=false,
+                                        HorizontalMirror=false,
+                                        VerticalMirror=false
+                                    };
+                                    await cam.UpdateAllSettings(camSetting);
+                                    await repository.CreateCamSettingAsync(camSetting);
+                                }
+                                
+                                // add the camera to active list
+                                CamController.ActiveCameras.Add(cam);
+                            }
+                            
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
+                    // Console.WriteLine(e.GetType().ToString());
+                    if(e.GetType().ToString() != "System.Threading.Tasks.TaskCanceledException")
+                        Console.WriteLine(e.ToString());
                 }
 
             }
-
+            
             return await Task.FromResult(cameraList);
         }
     }

@@ -1,5 +1,8 @@
-#include "esp_camera.h"
 #include <WiFi.h>
+#include "esp_camera.h"
+
+#include <HTTPClient.h>
+#include <Arduino_JSON.h>
 
 // MOD
 // WARNING!!! Make sure that you have either selected ESP32 Wrover Module,
@@ -20,6 +23,9 @@
 
 const char* ssid = "YANG";
 const char* password = "417645885";
+
+const char* server_ip = "192.168.50.85";
+const char* server_port = "8080";
 
 uint8_t dis_count = 0;
 
@@ -120,6 +126,57 @@ void setup() {
   Serial.print("Camera Ready! Use 'http://");
   Serial.print(WiFi.localIP());
   Serial.println("' to connect");
+
+  // get initial setting
+  char macStr[18];
+  byte array[6];
+  WiFi.macAddress(array);
+  snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x", array[0], array[1], array[2], array[3], array[4], array[5]);
+
+  WiFiClient client;
+  HTTPClient http;
+  
+  String get_setting_string="http://"+String(server_ip)+":"+String(server_port)+"/api/camSettings/"+String(macStr)+"?ipAddr="+WiFi.localIP().toString();
+  http.begin(client, get_setting_string);
+
+  int httpResponseCode = http.GET();
+  
+  String payload = "{}";
+  if (httpResponseCode>0) {
+    payload = http.getString();
+    JSONVar myObject = JSON.parse(payload);
+    if (JSON.typeof(myObject) != "undefined") {
+      JSONVar keys = myObject.keys();
+      for (int i = 0; i < keys.length(); i++) {
+        JSONVar value = myObject[keys[i]];
+        sensor_t * s = esp_camera_sensor_get();
+        String key_string = JSONVar::stringify(keys[i]);
+        if(key_string==String("\"frameSize\""))
+        {
+          s->set_framesize(s, (framesize_t)int(value));
+        }
+        else if(key_string==String("\"flashLightOn\""))
+        {
+          #define LED_BUILTIN 4
+          pinMode(LED_BUILTIN, OUTPUT);
+          digitalWrite(LED_BUILTIN, bool(value)?1:0);
+        }
+        else if(key_string==String("\"horizontalMirror\""))
+        {
+          s->set_hmirror(s, bool(value));
+        }
+        else if(key_string==String("\"verticalMirror\""))
+        {
+          s->set_vflip(s, bool(value));
+        }
+      }
+    }
+  }
+
+  http.end();
+
+  
+  
 }
 
 void loop() {

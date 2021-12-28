@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
@@ -109,6 +110,20 @@ namespace Home_Cam_Backend
                 IpAddr=cam.IpAddr,
                 UniqueId=cam.UniqueId
             };
+        }
+
+        public static void WriteToLogFile(string content, string path="D:/Download/ConsoleOutput.txt")
+        {
+            using(FileStream ostrm = new(path, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write))
+            {
+                using(StreamWriter writer = new StreamWriter (ostrm))
+                {
+                    TextWriter oldOut = Console.Out;
+                    Console.SetOut (writer);
+                    Console.WriteLine(content);
+                    Console.SetOut (oldOut);
+                }
+            }
         }
     }
 }

@@ -128,7 +128,7 @@ namespace Home_Cam_Backend
                         string responseString = await idResult.Content.ReadAsStringAsync();
                         if (responseString.StartsWith("ESP32="))
                         {
-                            // var cam = ActivatorUtilities.CreateInstance<Esp32Cam>((new ServiceCollection()).BuildServiceProvider(),ipAddr, responseString.Substring(6));
+                            
                             var cam = new Esp32Cam(ipAddr, responseString.Substring(6));
                             if(CamController.ActiveCameras.Find(camInList=>camInList.UniqueId==cam.UniqueId) is null)
                             {
@@ -160,6 +160,7 @@ namespace Home_Cam_Backend
                                 
                                 // add the camera to active list
                                 CamController.ActiveCameras.Add(cam);
+                                Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] FindCameras with MAC = {cam.UniqueId} and IP = {cam.IpAddr}");
                             }
                             
                         }

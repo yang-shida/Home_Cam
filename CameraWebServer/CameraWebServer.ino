@@ -18,14 +18,17 @@
 
 #include "camera_pins.h"
 
-//const char* ssid = "TP-LINK_2C56";
-//const char* password = "cici1616";
+const char* ssid = "TP-LINK_2C56";
+const char* password = "cici1616";
 
-const char* ssid = "YANG";
-const char* password = "417645885";
-
-const char* server_ip = "192.168.50.85";
+const char* server_ip = "192.168.1.106";
 const char* server_port = "8080";
+
+//const char* ssid = "YANG";
+//const char* password = "417645885";
+//
+//const char* server_ip = "192.168.50.85";
+//const char* server_port = "8080";
 
 uint8_t dis_count = 0;
 
@@ -171,6 +174,16 @@ void setup() {
         }
       }
     }
+  }
+  // unable to reach server, use default setting
+  else {
+    sensor_t * s = esp_camera_sensor_get();
+    s->set_framesize(s, (framesize_t)6);
+    #define LED_BUILTIN 4
+    pinMode(LED_BUILTIN, OUTPUT);
+    digitalWrite(LED_BUILTIN, 0);
+    s->set_hmirror(s, false);
+    s->set_vflip(s, false);
   }
 
   http.end();

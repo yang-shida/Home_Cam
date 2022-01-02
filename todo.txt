@@ -26,4 +26,6 @@ Backend:
             - if fail more than 10 times in a row, remove this camera since it might be offline
         - log image info into database
         - check if capacity is close to full, delete old image if necessary (need to update database)
+
+Response.onstart ???
     

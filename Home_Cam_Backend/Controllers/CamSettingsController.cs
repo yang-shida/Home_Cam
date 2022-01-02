@@ -22,7 +22,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{uniqueId}")]
         public async Task<ActionResult<CamSettingDto>> GetCamSettingAsync(string uniqueId, string ipAddr=null)
         {
-            Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] GetCamSettingAsync with MAC={uniqueId} and IP = {ipAddr ?? "Null"}");
+            Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] GetCamSettingAsync with MAC = {uniqueId} and IP = {ipAddr ?? "Null"}");
             
             // request comes from a camera, add it to ActiveCameras list if is not in the list
             if(ipAddr is not null)

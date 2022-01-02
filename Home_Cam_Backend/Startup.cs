@@ -70,6 +70,7 @@ namespace Home_Cam_Backend
             });
 
             await Esp32Cam.FindCameras(repository);
+            
         }
     }
 }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
@@ -30,16 +32,42 @@ namespace Home_Cam_Backend.Controllers
         }
 
         [HttpGet("{camId}")]
-        public async Task<ActionResult<string>> Streaming(string camId, bool start)
+        public async Task Streaming(string camId)
         {
-            if(start)
+            Esp32Cam cam = ActiveCameras.Find(camInList => camInList.UniqueId==camId);
+            if(cam is null)
             {
-                return $"{camId} streaming started!";
+                return;
             }
-            else
+
+            Response.StatusCode = 206;
+            Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
+            Response.Headers.Add("Connection", "Keep-Alive");
+
+            while(true)
             {
-                return $"{camId} streaming closed!";
+                if (Request.HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                byte[] image = await cam.GetSingleShot();
+
+                string header =
+                    "--frame" + "\r\n" +
+                    "Content-Type:image/jpeg\r\n" +
+                    "Content-Length:" + image.Length + "\r\n\r\n";
+
+                string footer = "\r\n";
+
+                await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(header));
+                await Response.Body.WriteAsync(image);
+                await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
+                await Response.Body.FlushAsync();
+
             }
+
+            // await Response.StartAsync();
         }
 
     }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Home_Cam_Backend.BackgroundTasks;
 using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
 using Home_Cam_Backend.Repositories;
@@ -17,6 +18,7 @@ namespace Home_Cam_Backend.Controllers
     {
         private readonly ICamSettingsRepository repository;
         public static List<Esp32Cam> ActiveCameras=new();
+        
 
         public CamController(ICamSettingsRepository repo)
         {
@@ -31,44 +33,47 @@ namespace Home_Cam_Backend.Controllers
             return ActiveCameras.Select(cam=>cam.AsDto()).ToList();
         }
 
-        [HttpGet("{camId}")]
-        public async Task Streaming(string camId)
-        {
-            Esp32Cam cam = ActiveCameras.Find(camInList => camInList.UniqueId==camId);
-            if(cam is null)
-            {
-                return;
-            }
+        // [HttpGet("{camId}")]
+        // public async Task<IActionResult> Streaming(string camId)
+        // {
+        //     int camIndex = ActiveCameras.FindIndex(camInList => camInList.UniqueId==camId);
+        //     if(camIndex == -1)
+        //     {
+        //         return NotFound();
+        //     }
 
-            Response.StatusCode = 206;
-            Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
-            Response.Headers.Add("Connection", "Keep-Alive");
+        //     var contentType = "multipart/x-mixed-replace;boundary=123456789000000000000987654321";
+        //     Stream stream = ImageCaptureBackgroundTask.ActiveStreams[camIndex];
+        //     var result = new FileStreamResult(stream, contentType) {
+        //         EnableRangeProcessing = true
+        //     };
+        //     return result;
 
-            while(true)
-            {
-                if (Request.HttpContext.RequestAborted.IsCancellationRequested)
-                {
-                    break;
-                }
+        //     // Response.StatusCode = 206;
+        //     // Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
+        //     // Response.Headers.Add("Connection", "Keep-Alive");
 
-                byte[] image = await cam.GetSingleShot();
+        //     // while(!Request.HttpContext.RequestAborted.IsCancellationRequested)
+        //     // {
 
-                string header =
-                    "--frame" + "\r\n" +
-                    "Content-Type:image/jpeg\r\n" +
-                    "Content-Length:" + image.Length + "\r\n\r\n";
+        //     //     byte[] image = cam.ImageBuffer[cam.ImageBufferHeadIndex];
 
-                string footer = "\r\n";
+        //     //     string header =
+        //     //         "--frame" + "\r\n" +
+        //     //         "Content-Type:image/jpeg\r\n" +
+        //     //         "Content-Length:" + image.Length + "\r\n\r\n";
 
-                await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(header));
-                await Response.Body.WriteAsync(image);
-                await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
-                await Response.Body.FlushAsync();
+        //     //     string footer = "\r\n";
 
-            }
+        //     //     await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(header));
+        //     //     await Response.Body.WriteAsync(image);
+        //     //     await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
+        //     //     await Response.Body.FlushAsync();
 
-            // await Response.StartAsync();
-        }
+        //     // }
+
+        //     // await Response.StartAsync();
+        // }
 
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Home_Cam_Backend.BackgroundTasks;
 using Home_Cam_Backend.Repositories;
 using Home_Cam_Backend.Settings;
 using Microsoft.AspNetCore.Builder;
@@ -29,6 +30,8 @@ namespace Home_Cam_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHostedService<ImageCaptureBackgroundTask>();
+            services.AddHostedService<SearchCamBackgroundTask>();
 
             services.AddSingleton<ICamSettingsRepository, MongoDbCamSettingsRepository>();
 
@@ -49,7 +52,7 @@ namespace Home_Cam_Backend
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, ICamSettingsRepository repository)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ICamSettingsRepository repository)
         {
             if (env.IsDevelopment())
             {
@@ -69,7 +72,7 @@ namespace Home_Cam_Backend
                 endpoints.MapControllers();
             });
 
-            await Esp32Cam.FindCameras(repository);
+            // await Esp32Cam.FindCameras(repository);
             
         }
     }

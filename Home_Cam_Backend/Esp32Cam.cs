@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
+using Home_Cam_Backend.BackgroundTasks;
 using Home_Cam_Backend.Controllers;
 using Home_Cam_Backend.Entities;
 using Home_Cam_Backend.Repositories;
@@ -15,13 +18,46 @@ namespace Home_Cam_Backend
 {
     public class Esp32Cam
     {
+        public enum ParsingStatus : ushort
+        {
+            LookingForLengthAndTime = 0,
+            GettingData = 1,
+            OutlierReading = 200
+        }
         public string IpAddr { get; set; }
         public string UniqueId { get; init; }
         private HttpClient httpClient = new();
-        public Esp32Cam(string ip, string id)
+
+        public DateTimeOffset DiscoverTimeServer { get; set; }
+        public long DiscoverTimeCameraMilliseconds { get; set; }
+
+        public List<BufferedImage> ImageBuffer { get; set; }
+        public int CurrentImageByteIndex { get; set; }
+        public int ImageBufferHeadIndex { get; set; }
+        public static readonly int ImageBufferMaxSize = 5;
+        public Stream CamStream { get; set; }
+        public byte[] StreamBuffer { get; set; }
+        public int RemainingData { get; set; }
+        public static int StreamBufferSize = 1024*1024;
+        public ParsingStatus MyParsingStatus { get; set; }
+
+        public Esp32Cam(string ip, string id, long cameraTimeMicroSeconds)
         {
             IpAddr = ip;
             UniqueId = id;
+            ImageBufferHeadIndex = 0;
+            CurrentImageByteIndex = 0;
+            ImageBuffer = new();
+            for(int i=0; i<ImageBufferMaxSize; i++)
+            {
+                ImageBuffer.Add(new BufferedImage());
+            }
+            StreamBuffer = new byte[StreamBufferSize];
+            RemainingData = 0;
+            MyParsingStatus = ParsingStatus.LookingForLengthAndTime;
+
+            DiscoverTimeServer= new DateTimeOffset(DateTime.UtcNow);
+            DiscoverTimeCameraMilliseconds = cameraTimeMicroSeconds/1000;
         }
         public async Task AdjustFrameSize(int newFrameSizeCode)
         {
@@ -40,7 +76,7 @@ namespace Home_Cam_Backend
         {
             try
             {
-                await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=flash&val={(flashOn?1:0)}");
+                await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=flash&val={(flashOn ? 1 : 0)}");
             }
             catch (Exception e)
             {
@@ -54,8 +90,8 @@ namespace Home_Cam_Backend
             HttpResponseMessage res = null;
             try
             {
-                res = await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=hmirror&val={(mirrored?1:0)}");
-                
+                res = await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=hmirror&val={(mirrored ? 1 : 0)}");
+
             }
             catch (Exception e)
             {
@@ -68,7 +104,7 @@ namespace Home_Cam_Backend
         {
             try
             {
-                await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=vflip&val={(mirrored?1:0)}");
+                await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=vflip&val={(mirrored ? 1 : 0)}");
             }
             catch (Exception e)
             {
@@ -77,18 +113,45 @@ namespace Home_Cam_Backend
             }
         }
 
-        public async Task<byte[]> GetSingleShot()
+        // public async Task<byte[]> GetSingleShot()
+        // {
+        //     try
+        //     {
+        //         HttpResponseMessage imageResult = await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_capture?cb={DateTime.Now.Ticks}");
+        //         byte[] imageArray = await imageResult.Content.ReadAsByteArrayAsync();
+        //         if (ImageBuffer.Count < ImageBufferMaxSize)
+        //         {
+        //             ImageBuffer.Add(imageArray);
+        //             ImageBufferHeadIndex = ImageBuffer.Count - 1;
+        //         }
+        //         else
+        //         {
+        //             int tempHeadIndex = (ImageBufferHeadIndex + 1) % ImageBufferMaxSize;
+        //             ImageBuffer[tempHeadIndex] = imageArray;
+        //             ImageBufferHeadIndex = tempHeadIndex;
+        //         }
+        //         return await Task.FromResult(imageArray);
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         Console.WriteLine(e.ToString());
+        //         throw new Exception("[GetSingleShot] Cannot talk to camera!");
+        //     }
+        // }
+
+        // http://192.168.1.105:81/esp32_cam_stream
+        public async Task<Stream> Streaming()
         {
             try
             {
-                HttpResponseMessage imageResult = await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_capture?cb={DateTime.Now.Ticks}");
-                byte[] imageArray = await imageResult.Content.ReadAsByteArrayAsync();
-                return await Task.FromResult(imageArray);
+                Stream imageResult = await httpClient.GetStreamAsync($"http://{IpAddr}:81/esp32_cam_stream");
+                CamStream = imageResult;
+                return imageResult;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-                throw new Exception("[GetSingleShot] Cannot talk to camera!");
+                throw new Exception("[Streaming] Cannot talk to camera!");
             }
         }
 
@@ -107,6 +170,7 @@ namespace Home_Cam_Backend
             List<Esp32Cam> cameraList = new();
             HttpClient client = new();
             client.Timeout = TimeSpan.FromSeconds(2);
+            client.DefaultRequestHeaders.ConnectionClose = true;
             List<Task<HttpResponseMessage>> requestList = new();
 
             foreach (string CAM_IP in ipAddrList)
@@ -123,20 +187,21 @@ namespace Home_Cam_Backend
                     await req;
                     var idResult = req.Result;
 
+
                     if (idResult.StatusCode.ToString() == "OK")
                     {
                         string responseString = await idResult.Content.ReadAsStringAsync();
                         if (responseString.StartsWith("ESP32="))
                         {
-                            
-                            var cam = new Esp32Cam(ipAddr, responseString.Substring(6));
-                            if(CamController.ActiveCameras.Find(camInList=>camInList.UniqueId==cam.UniqueId) is null)
+                            var cam = new Esp32Cam(ipAddr, responseString.Substring(6, 17), long.Parse(responseString.Substring(24)));
+                            await cam.Streaming();
+                            if (CamController.ActiveCameras.Find(camInList => camInList.UniqueId == cam.UniqueId) is null)
                             {
                                 cameraList.Add(cam);
-                                
+
                                 var camSetting = await repository.GetCamSettingAsync(cam.UniqueId);
                                 // if the camera's setting is in the database
-                                if(camSetting is not null)
+                                if (camSetting is not null)
                                 {
                                     // update the camera's setting
                                     await cam.UpdateAllSettings(camSetting);
@@ -147,34 +212,39 @@ namespace Home_Cam_Backend
                                     // create a default camera setting and update the camera setting
                                     camSetting = new()
                                     {
-                                        UniqueId=cam.UniqueId,
-                                        Location="Default Location",
-                                        FrameSize=6,
-                                        FlashLightOn=false,
-                                        HorizontalMirror=false,
-                                        VerticalMirror=false
+                                        UniqueId = cam.UniqueId,
+                                        Location = "Default Location",
+                                        FrameSize = 6,
+                                        FlashLightOn = false,
+                                        HorizontalMirror = false,
+                                        VerticalMirror = false
                                     };
                                     await cam.UpdateAllSettings(camSetting);
                                     await repository.CreateCamSettingAsync(camSetting);
                                 }
-                                
+
                                 // add the camera to active list
                                 CamController.ActiveCameras.Add(cam);
                                 Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] FindCameras with MAC = {cam.UniqueId} and IP = {cam.IpAddr}");
                             }
-                            
+
                         }
                     }
                 }
                 catch (Exception e)
                 {
                     // Console.WriteLine(e.GetType().ToString());
-                    if(e.GetType().ToString() != "System.Threading.Tasks.TaskCanceledException")
+                    if (e.GetType().ToString() != "System.Threading.Tasks.TaskCanceledException")
+                    {
                         Console.WriteLine(e.ToString());
+                    }
+
                 }
 
             }
-            
+
+            client.Dispose();
+
             return await Task.FromResult(cameraList);
         }
     }

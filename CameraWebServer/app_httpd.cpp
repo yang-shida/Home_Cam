@@ -18,6 +18,7 @@
 #include "img_converters.h"
 #include "camera_index.h"
 #include "Arduino.h"
+#include "Int64String.h"
 
 #include "fb_gfx.h"
 #include "fd_forward.h"
@@ -163,47 +164,47 @@ static void draw_face_boxes(dl_matrix3du_t *image_matrix, box_array_t *boxes, in
     }
 }
 
-static int run_face_recognition(dl_matrix3du_t *image_matrix, box_array_t *net_boxes){
-    dl_matrix3du_t *aligned_face = NULL;
-    int matched_id = 0;
-
-    aligned_face = dl_matrix3du_alloc(1, FACE_WIDTH, FACE_HEIGHT, 3);
-    if(!aligned_face){
-        Serial.println("Could not allocate face recognition buffer");
-        return matched_id;
-    }
-    if (align_face(net_boxes, image_matrix, aligned_face) == ESP_OK){
-        if (is_enrolling == 1){
-            int8_t left_sample_face = enroll_face(&id_list, aligned_face);
-
-            if(left_sample_face == (ENROLL_CONFIRM_TIMES - 1)){
-                Serial.printf("Enrolling Face ID: %d\n", id_list.tail);
-            }
-            Serial.printf("Enrolling Face ID: %d sample %d\n", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
-            rgb_printf(image_matrix, FACE_COLOR_CYAN, "ID[%u] Sample[%u]", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
-            if (left_sample_face == 0){
-                is_enrolling = 0;
-                Serial.printf("Enrolled Face ID: %d\n", id_list.tail);
-            }
-        } else {
-            matched_id = recognize_face(&id_list, aligned_face);
-            if (matched_id >= 0) {
-                Serial.printf("Match Face ID: %u\n", matched_id);
-                rgb_printf(image_matrix, FACE_COLOR_GREEN, "Hello Subject %u", matched_id);
-            } else {
-                Serial.println("No Match Found");
-                rgb_print(image_matrix, FACE_COLOR_RED, "Intruder Alert!");
-                matched_id = -1;
-            }
-        }
-    } else {
-        Serial.println("Face Not Aligned");
-        //rgb_print(image_matrix, FACE_COLOR_YELLOW, "Human Detected");
-    }
-
-    dl_matrix3du_free(aligned_face);
-    return matched_id;
-}
+//static int run_face_recognition(dl_matrix3du_t *image_matrix, box_array_t *net_boxes){
+//    dl_matrix3du_t *aligned_face = NULL;
+//    int matched_id = 0;
+//
+//    aligned_face = dl_matrix3du_alloc(1, FACE_WIDTH, FACE_HEIGHT, 3);
+//    if(!aligned_face){
+//        Serial.println("Could not allocate face recognition buffer");
+//        return matched_id;
+//    }
+//    if (align_face(net_boxes, image_matrix, aligned_face) == ESP_OK){
+//        if (is_enrolling == 1){
+//            int8_t left_sample_face = enroll_face(&id_list, aligned_face);
+//
+//            if(left_sample_face == (ENROLL_CONFIRM_TIMES - 1)){
+//                Serial.printf("Enrolling Face ID: %d\n", id_list.tail);
+//            }
+//            Serial.printf("Enrolling Face ID: %d sample %d\n", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
+//            rgb_printf(image_matrix, FACE_COLOR_CYAN, "ID[%u] Sample[%u]", id_list.tail, ENROLL_CONFIRM_TIMES - left_sample_face);
+//            if (left_sample_face == 0){
+//                is_enrolling = 0;
+//                Serial.printf("Enrolled Face ID: %d\n", id_list.tail);
+//            }
+//        } else {
+//            matched_id = recognize_face(&id_list, aligned_face);
+//            if (matched_id >= 0) {
+//                Serial.printf("Match Face ID: %u\n", matched_id);
+//                rgb_printf(image_matrix, FACE_COLOR_GREEN, "Hello Subject %u", matched_id);
+//            } else {
+//                Serial.println("No Match Found");
+//                rgb_print(image_matrix, FACE_COLOR_RED, "Intruder Alert!");
+//                matched_id = -1;
+//            }
+//        }
+//    } else {
+//        Serial.println("Face Not Aligned");
+//        //rgb_print(image_matrix, FACE_COLOR_YELLOW, "Human Detected");
+//    }
+//
+//    dl_matrix3du_free(aligned_face);
+//    return matched_id;
+//}
 
 static size_t jpg_encode_stream(void * arg, size_t index, const void* data, size_t len){
     jpg_chunking_t *j = (jpg_chunking_t *)arg;
@@ -281,9 +282,9 @@ static esp_err_t capture_handler(httpd_req_t *req){
 
     if (net_boxes){
         detected = true;
-        if(recognition_enabled){
-            face_id = run_face_recognition(image_matrix, net_boxes);
-        }
+//        if(recognition_enabled){
+//            face_id = run_face_recognition(image_matrix, net_boxes);
+//        }
         draw_face_boxes(image_matrix, net_boxes, face_id);
         free(net_boxes->score);
         free(net_boxes->box);
@@ -379,9 +380,9 @@ static esp_err_t stream_handler(httpd_req_t *req){
                         if (net_boxes || fb->format != PIXFORMAT_JPEG){
                             if(net_boxes){
                                 detected = true;
-                                if(recognition_enabled){
-                                    face_id = run_face_recognition(image_matrix, net_boxes);
-                                }
+//                                if(recognition_enabled){
+//                                    face_id = run_face_recognition(image_matrix, net_boxes);
+//                                }
                                 fr_recognize = esp_timer_get_time();
                                 draw_face_boxes(image_matrix, net_boxes, face_id);
                                 free(net_boxes->score);
@@ -405,16 +406,25 @@ static esp_err_t stream_handler(httpd_req_t *req){
                 }
             }
         }
+        
+//        if(res == ESP_OK){
+//            size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
+//            res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
+//        }
+//        if(res == ESP_OK){
+//            res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
+//        }
+//        if(res == ESP_OK){
+//            res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+//        }
+
         if(res == ESP_OK){
-            size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
+            const char* length_time_format = "length=%uXtime=%sX";
+            size_t hlen = snprintf((char *)part_buf, 64, length_time_format, _jpg_buf_len, int64String(fr_start, DEC, false));
             res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-        }
-        if(res == ESP_OK){
             res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
         }
-        if(res == ESP_OK){
-            res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
-        }
+        
         if(fb){
             esp_camera_fb_return(fb);
             fb = NULL;
@@ -460,7 +470,7 @@ static esp_err_t id_handler(httpd_req_t *req) {
     WiFi.macAddress(array);
     snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x", array[0], array[1], array[2], array[3], array[4], array[5]);
     
-    std::string res_str = "ESP32="+std::string(macStr);
+    String res_str = "ESP32="+String(macStr)+"="+int64String(esp_timer_get_time(), DEC, false);
     return httpd_resp_send(req, (const char *)res_str.c_str(), res_str.length());
 }
 
@@ -503,42 +513,42 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     if(!strcmp(variable, "framesize")) {
         if(s->pixformat == PIXFORMAT_JPEG) res = s->set_framesize(s, (framesize_t)val);
     }
-    else if(!strcmp(variable, "quality")) res = s->set_quality(s, val);
-    else if(!strcmp(variable, "contrast")) res = s->set_contrast(s, val);
-    else if(!strcmp(variable, "brightness")) res = s->set_brightness(s, val);
-    else if(!strcmp(variable, "saturation")) res = s->set_saturation(s, val);
-    else if(!strcmp(variable, "gainceiling")) res = s->set_gainceiling(s, (gainceiling_t)val);
-    else if(!strcmp(variable, "colorbar")) res = s->set_colorbar(s, val);
-    else if(!strcmp(variable, "awb")) res = s->set_whitebal(s, val);
-    else if(!strcmp(variable, "agc")) res = s->set_gain_ctrl(s, val);
-    else if(!strcmp(variable, "aec")) res = s->set_exposure_ctrl(s, val);
+//    else if(!strcmp(variable, "quality")) res = s->set_quality(s, val);
+//    else if(!strcmp(variable, "contrast")) res = s->set_contrast(s, val);
+//    else if(!strcmp(variable, "brightness")) res = s->set_brightness(s, val);
+//    else if(!strcmp(variable, "saturation")) res = s->set_saturation(s, val);
+//    else if(!strcmp(variable, "gainceiling")) res = s->set_gainceiling(s, (gainceiling_t)val);
+//    else if(!strcmp(variable, "colorbar")) res = s->set_colorbar(s, val);
+//    else if(!strcmp(variable, "awb")) res = s->set_whitebal(s, val);
+//    else if(!strcmp(variable, "agc")) res = s->set_gain_ctrl(s, val);
+//    else if(!strcmp(variable, "aec")) res = s->set_exposure_ctrl(s, val);
     else if(!strcmp(variable, "hmirror")) res = s->set_hmirror(s, val);
     else if(!strcmp(variable, "vflip")) res = s->set_vflip(s, val);
-    else if(!strcmp(variable, "awb_gain")) res = s->set_awb_gain(s, val);
-    else if(!strcmp(variable, "agc_gain")) res = s->set_agc_gain(s, val);
-    else if(!strcmp(variable, "aec_value")) res = s->set_aec_value(s, val);
-    else if(!strcmp(variable, "aec2")) res = s->set_aec2(s, val);
-    else if(!strcmp(variable, "dcw")) res = s->set_dcw(s, val);
-    else if(!strcmp(variable, "bpc")) res = s->set_bpc(s, val);
-    else if(!strcmp(variable, "wpc")) res = s->set_wpc(s, val);
-    else if(!strcmp(variable, "raw_gma")) res = s->set_raw_gma(s, val);
-    else if(!strcmp(variable, "lenc")) res = s->set_lenc(s, val);
-    else if(!strcmp(variable, "special_effect")) res = s->set_special_effect(s, val);
-    else if(!strcmp(variable, "wb_mode")) res = s->set_wb_mode(s, val);
-    else if(!strcmp(variable, "ae_level")) res = s->set_ae_level(s, val);
-    else if(!strcmp(variable, "face_detect")) {
-        detection_enabled = val;
-        if(!detection_enabled) {
-            recognition_enabled = 0;
-        }
-    }
-    else if(!strcmp(variable, "face_enroll")) is_enrolling = val;
-    else if(!strcmp(variable, "face_recognize")) {
-        recognition_enabled = val;
-        if(recognition_enabled){
-            detection_enabled = val;
-        }
-    }
+//    else if(!strcmp(variable, "awb_gain")) res = s->set_awb_gain(s, val);
+//    else if(!strcmp(variable, "agc_gain")) res = s->set_agc_gain(s, val);
+//    else if(!strcmp(variable, "aec_value")) res = s->set_aec_value(s, val);
+//    else if(!strcmp(variable, "aec2")) res = s->set_aec2(s, val);
+//    else if(!strcmp(variable, "dcw")) res = s->set_dcw(s, val);
+//    else if(!strcmp(variable, "bpc")) res = s->set_bpc(s, val);
+//    else if(!strcmp(variable, "wpc")) res = s->set_wpc(s, val);
+//    else if(!strcmp(variable, "raw_gma")) res = s->set_raw_gma(s, val);
+//    else if(!strcmp(variable, "lenc")) res = s->set_lenc(s, val);
+//    else if(!strcmp(variable, "special_effect")) res = s->set_special_effect(s, val);
+//    else if(!strcmp(variable, "wb_mode")) res = s->set_wb_mode(s, val);
+//    else if(!strcmp(variable, "ae_level")) res = s->set_ae_level(s, val);
+//    else if(!strcmp(variable, "face_detect")) {
+//        detection_enabled = val;
+//        if(!detection_enabled) {
+//            recognition_enabled = 0;
+//        }
+//    }
+//    else if(!strcmp(variable, "face_enroll")) is_enrolling = val;
+//    else if(!strcmp(variable, "face_recognize")) {
+//        recognition_enabled = val;
+//        if(recognition_enabled){
+//            detection_enabled = val;
+//        }
+//    }
       else if(!strcmp(variable, "flash")) {
         #define LED_BUILTIN 4
         pinMode(LED_BUILTIN, OUTPUT);
@@ -568,55 +578,55 @@ static esp_err_t cmd_handler(httpd_req_t *req){
     return httpd_resp_send(req, NULL, 0);
 }
 
-static esp_err_t status_handler(httpd_req_t *req){
-    static char json_response[1024];
+//static esp_err_t status_handler(httpd_req_t *req){
+//    static char json_response[1024];
+//
+//    sensor_t * s = esp_camera_sensor_get();
+//    char * p = json_response;
+//    *p++ = '{';
+//
+//    p+=sprintf(p, "\"framesize\":%u,", s->status.framesize);
+//    p+=sprintf(p, "\"quality\":%u,", s->status.quality);
+//    p+=sprintf(p, "\"brightness\":%d,", s->status.brightness);
+//    p+=sprintf(p, "\"contrast\":%d,", s->status.contrast);
+//    p+=sprintf(p, "\"saturation\":%d,", s->status.saturation);
+//    p+=sprintf(p, "\"sharpness\":%d,", s->status.sharpness);
+//    p+=sprintf(p, "\"special_effect\":%u,", s->status.special_effect);
+//    p+=sprintf(p, "\"wb_mode\":%u,", s->status.wb_mode);
+//    p+=sprintf(p, "\"awb\":%u,", s->status.awb);
+//    p+=sprintf(p, "\"awb_gain\":%u,", s->status.awb_gain);
+//    p+=sprintf(p, "\"aec\":%u,", s->status.aec);
+//    p+=sprintf(p, "\"aec2\":%u,", s->status.aec2);
+//    p+=sprintf(p, "\"ae_level\":%d,", s->status.ae_level);
+//    p+=sprintf(p, "\"aec_value\":%u,", s->status.aec_value);
+//    p+=sprintf(p, "\"agc\":%u,", s->status.agc);
+//    p+=sprintf(p, "\"agc_gain\":%u,", s->status.agc_gain);
+//    p+=sprintf(p, "\"gainceiling\":%u,", s->status.gainceiling);
+//    p+=sprintf(p, "\"bpc\":%u,", s->status.bpc);
+//    p+=sprintf(p, "\"wpc\":%u,", s->status.wpc);
+//    p+=sprintf(p, "\"raw_gma\":%u,", s->status.raw_gma);
+//    p+=sprintf(p, "\"lenc\":%u,", s->status.lenc);
+//    p+=sprintf(p, "\"vflip\":%u,", s->status.vflip);
+//    p+=sprintf(p, "\"hmirror\":%u,", s->status.hmirror);
+//    p+=sprintf(p, "\"dcw\":%u,", s->status.dcw);
+//    p+=sprintf(p, "\"colorbar\":%u,", s->status.colorbar);
+//    p+=sprintf(p, "\"face_detect\":%u,", detection_enabled);
+//    p+=sprintf(p, "\"face_enroll\":%u,", is_enrolling);
+//    p+=sprintf(p, "\"face_recognize\":%u", recognition_enabled);
+//    p+=sprintf(p, "\"flash\":%u,", flash_enabled);
+//    *p++ = '}';
+//    *p++ = 0;
+//    httpd_resp_set_type(req, "application/json");
+//    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+//    return httpd_resp_send(req, json_response, strlen(json_response));
+//}
 
-    sensor_t * s = esp_camera_sensor_get();
-    char * p = json_response;
-    *p++ = '{';
-
-    p+=sprintf(p, "\"framesize\":%u,", s->status.framesize);
-    p+=sprintf(p, "\"quality\":%u,", s->status.quality);
-    p+=sprintf(p, "\"brightness\":%d,", s->status.brightness);
-    p+=sprintf(p, "\"contrast\":%d,", s->status.contrast);
-    p+=sprintf(p, "\"saturation\":%d,", s->status.saturation);
-    p+=sprintf(p, "\"sharpness\":%d,", s->status.sharpness);
-    p+=sprintf(p, "\"special_effect\":%u,", s->status.special_effect);
-    p+=sprintf(p, "\"wb_mode\":%u,", s->status.wb_mode);
-    p+=sprintf(p, "\"awb\":%u,", s->status.awb);
-    p+=sprintf(p, "\"awb_gain\":%u,", s->status.awb_gain);
-    p+=sprintf(p, "\"aec\":%u,", s->status.aec);
-    p+=sprintf(p, "\"aec2\":%u,", s->status.aec2);
-    p+=sprintf(p, "\"ae_level\":%d,", s->status.ae_level);
-    p+=sprintf(p, "\"aec_value\":%u,", s->status.aec_value);
-    p+=sprintf(p, "\"agc\":%u,", s->status.agc);
-    p+=sprintf(p, "\"agc_gain\":%u,", s->status.agc_gain);
-    p+=sprintf(p, "\"gainceiling\":%u,", s->status.gainceiling);
-    p+=sprintf(p, "\"bpc\":%u,", s->status.bpc);
-    p+=sprintf(p, "\"wpc\":%u,", s->status.wpc);
-    p+=sprintf(p, "\"raw_gma\":%u,", s->status.raw_gma);
-    p+=sprintf(p, "\"lenc\":%u,", s->status.lenc);
-    p+=sprintf(p, "\"vflip\":%u,", s->status.vflip);
-    p+=sprintf(p, "\"hmirror\":%u,", s->status.hmirror);
-    p+=sprintf(p, "\"dcw\":%u,", s->status.dcw);
-    p+=sprintf(p, "\"colorbar\":%u,", s->status.colorbar);
-    p+=sprintf(p, "\"face_detect\":%u,", detection_enabled);
-    p+=sprintf(p, "\"face_enroll\":%u,", is_enrolling);
-    p+=sprintf(p, "\"face_recognize\":%u", recognition_enabled);
-    p+=sprintf(p, "\"flash\":%u,", flash_enabled);
-    *p++ = '}';
-    *p++ = 0;
-    httpd_resp_set_type(req, "application/json");
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
-    return httpd_resp_send(req, json_response, strlen(json_response));
-}
-
-static esp_err_t index_handler(httpd_req_t *req){
-    httpd_resp_set_type(req, "text/html");
-    httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
-    sensor_t * s = esp_camera_sensor_get();
-    return httpd_resp_send(req, (const char *)index_ov2640_html_gz, index_ov2640_html_gz_len);
-}
+//static esp_err_t index_handler(httpd_req_t *req){
+//    httpd_resp_set_type(req, "text/html");
+//    httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+//    sensor_t * s = esp_camera_sensor_get();
+//    return httpd_resp_send(req, (const char *)index_ov2640_html_gz, index_ov2640_html_gz_len);
+//}
 
 static esp_err_t signal_handler(httpd_req_t *req){
     httpd_resp_set_type(req, "text/html");
@@ -636,19 +646,19 @@ static esp_err_t restart_handler(httpd_req_t *req){
 
 void startCameraServer(){
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    httpd_uri_t index_uri = {
-        .uri       = "/",
-        .method    = HTTP_GET,
-        .handler   = index_handler,
-        .user_ctx  = NULL
-    };
+//    httpd_uri_t index_uri = {
+//        .uri       = "/",
+//        .method    = HTTP_GET,
+//        .handler   = index_handler,
+//        .user_ctx  = NULL
+//    };
 
-    httpd_uri_t status_uri = {
-        .uri       = "/esp32_cam_status",
-        .method    = HTTP_GET,
-        .handler   = status_handler,
-        .user_ctx  = NULL
-    };
+//    httpd_uri_t status_uri = {
+//        .uri       = "/esp32_cam_status",
+//        .method    = HTTP_GET,
+//        .handler   = status_handler,
+//        .user_ctx  = NULL
+//    };
 
     httpd_uri_t signal_uri = {
         .uri       = "/signal",
@@ -713,9 +723,9 @@ void startCameraServer(){
     
     Serial.printf("Starting web server on port: '%d'\n", config.server_port);
     if (httpd_start(&camera_httpd, &config) == ESP_OK) {
-        httpd_register_uri_handler(camera_httpd, &index_uri);
+//        httpd_register_uri_handler(camera_httpd, &index_uri);
         httpd_register_uri_handler(camera_httpd, &cmd_uri);
-        httpd_register_uri_handler(camera_httpd, &status_uri);
+//        httpd_register_uri_handler(camera_httpd, &status_uri);
         httpd_register_uri_handler(camera_httpd, &signal_uri);
         httpd_register_uri_handler(camera_httpd, &restart_uri);
         httpd_register_uri_handler(camera_httpd, &capture_uri);

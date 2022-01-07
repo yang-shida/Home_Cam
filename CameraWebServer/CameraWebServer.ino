@@ -18,6 +18,8 @@
 
 #include "camera_pins.h"
 
+#include "Int64String.h"
+
 const char* ssid = "TP-LINK_2C56";
 const char* password = "cici1616";
 
@@ -139,7 +141,7 @@ void setup() {
   WiFiClient client;
   HTTPClient http;
   
-  String get_setting_string="http://"+String(server_ip)+":"+String(server_port)+"/api/camSettings/"+String(macStr)+"?ipAddr="+WiFi.localIP().toString();
+  String get_setting_string="http://"+String(server_ip)+":"+String(server_port)+"/api/camSettings/"+String(macStr)+"?ipAddr="+WiFi.localIP().toString()+"?camTime="+int64String(esp_timer_get_time(), DEC, false);
   http.begin(client, get_setting_string);
 
   int httpResponseCode = http.GET();

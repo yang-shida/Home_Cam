@@ -21,7 +21,7 @@ namespace Home_Cam_Backend.BackgroundTasks
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            MyTimer=new(SearchCameras, null, TimeSpan.Zero, TimeSpan.FromMinutes(15));
+            MyTimer=new(SearchCameras, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
             return Task.CompletedTask;
         }
 

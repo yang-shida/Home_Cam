@@ -34,11 +34,11 @@ namespace Home_Cam_Backend
         public List<BufferedImage> ImageBuffer { get; set; }
         public int CurrentImageByteIndex { get; set; }
         public int ImageBufferHeadIndex { get; set; }
-        public static readonly int ImageBufferMaxSize = 5;
+        public static readonly int ImageBufferMaxSize = 20;
         public Stream CamStream { get; set; }
         public byte[] StreamBuffer { get; set; }
         public int RemainingData { get; set; }
-        public static int StreamBufferSize = 1024*1024;
+        public static int StreamBufferSize = 1024*50;
         public ParsingStatus MyParsingStatus { get; set; }
 
         public Esp32Cam(string ip, string id, long cameraTimeMicroSeconds)
@@ -65,9 +65,8 @@ namespace Home_Cam_Backend
             {
                 await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=framesize&val={newFrameSizeCode}");
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e.ToString());
                 throw new Exception("[AdjustFrameSize] Cannot talk to camera!");
             }
         }
@@ -78,9 +77,8 @@ namespace Home_Cam_Backend
             {
                 await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=flash&val={(flashOn ? 1 : 0)}");
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e.ToString());
                 throw new Exception("[TurnOnFlash] Cannot talk to camera!");
             }
         }
@@ -93,9 +91,8 @@ namespace Home_Cam_Backend
                 res = await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=hmirror&val={(mirrored ? 1 : 0)}");
 
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e.ToString());
                 throw new Exception("[HorizontalMirror] Cannot talk to camera!");
             }
         }
@@ -106,9 +103,8 @@ namespace Home_Cam_Backend
             {
                 await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_control?var=vflip&val={(mirrored ? 1 : 0)}");
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e.ToString());
                 throw new Exception("[VerticalMirror] Cannot talk to camera!");
             }
         }
@@ -148,9 +144,8 @@ namespace Home_Cam_Backend
                 CamStream = imageResult;
                 return imageResult;
             }
-            catch (Exception e)
+            catch
             {
-                Console.WriteLine(e.ToString());
                 throw new Exception("[Streaming] Cannot talk to camera!");
             }
         }
@@ -173,9 +168,18 @@ namespace Home_Cam_Backend
             client.DefaultRequestHeaders.ConnectionClose = true;
             List<Task<HttpResponseMessage>> requestList = new();
 
-            foreach (string CAM_IP in ipAddrList)
+            for(int i=0; i<ipAddrList.Count; i++)
             {
-                requestList.Add(client.GetAsync($"http://{CAM_IP}/who_are_you"));
+                string CAM_IP = ipAddrList[i];
+                if(CamController.ActiveCameras.Find(camInList => camInList.IpAddr==CAM_IP) is null)
+                {
+                    requestList.Add(client.GetAsync($"http://{CAM_IP}/who_are_you"));
+                }
+                else
+                {
+                    ipAddrList.Remove(CAM_IP);
+                    i--;
+                }
             }
 
             for (int i = 0; i < requestList.Count; i++)
@@ -233,15 +237,24 @@ namespace Home_Cam_Backend
                 }
                 catch (Exception e)
                 {
-                    // Console.WriteLine(e.GetType().ToString());
                     if (e.GetType().ToString() != "System.Threading.Tasks.TaskCanceledException")
                     {
-                        Console.WriteLine(e.ToString());
+                        // Console.WriteLine(e.ToString());
                     }
-
                 }
 
             }
+
+            if(cameraList.Count==0)
+            {
+                Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] FindCameras: No new camera found.");
+            }
+
+            Extensions.WriteToLogFile("---------------- Current Active Cameras ----------------");
+            int count=1;
+            foreach(Esp32Cam cam in CamController.ActiveCameras)
+                Extensions.WriteToLogFile($"[{count++}] MAC = {cam.UniqueId} and IP = {cam.IpAddr}");
+            Extensions.WriteToLogFile("--------------------------------------------------------");
 
             client.Dispose();
 

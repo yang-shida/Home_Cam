@@ -141,7 +141,8 @@ void setup() {
   WiFiClient client;
   HTTPClient http;
   
-  String get_setting_string="http://"+String(server_ip)+":"+String(server_port)+"/api/camSettings/"+String(macStr)+"?ipAddr="+WiFi.localIP().toString()+"?camTime="+int64String(esp_timer_get_time(), DEC, false);
+  String get_setting_string="http://"+String(server_ip)+":"+String(server_port)+"/api/camSettings/"+String(macStr)+"?ipAddr="+WiFi.localIP().toString()+"&camTime="+int64String(esp_timer_get_time(), DEC, false);
+  
   http.begin(client, get_setting_string);
 
   int httpResponseCode = http.GET();

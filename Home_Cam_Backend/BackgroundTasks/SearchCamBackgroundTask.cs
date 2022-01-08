@@ -27,6 +27,7 @@ namespace Home_Cam_Backend.BackgroundTasks
 
         private async void SearchCameras(object? state)
         {
+            // Extensions.WriteToLogFile("Find cameras from background thread.");
             await Esp32Cam.FindCameras(repository);
         }
 

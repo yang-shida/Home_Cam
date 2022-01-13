@@ -273,7 +273,8 @@ namespace Home_Cam_Backend.BackgroundTasks
                                                 file.Directory.Create();
 
                                                 // save image
-                                                var _ = File.WriteAllBytesAsync(file.FullName, CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].image);
+                                                await File.WriteAllBytesAsync(file.FullName, CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].image);
+                                                
                                             }
                                             // corrupted image
                                             else

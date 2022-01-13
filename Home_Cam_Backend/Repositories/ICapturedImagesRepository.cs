@@ -7,7 +7,7 @@ namespace Home_Cam_Backend.Repositories
 {
     public interface ICapturedImagesRepository
     {
-        // Task CreateImageInfo(ECapturedImageInfo image);
+        Task CreateImageInfo(ECapturedImageInfo image);
         // Task<List<ECapturedImageInfo>> GetImageInfos(DateTime beginDateTime, DateTime endDateTime);
         // Task<ECapturedImageInfo> GetImageInfo(DateTime beginDateTime, DateTime endDateTime);
         // Task UpdateImageInfo(ECapturedImageInfo image);

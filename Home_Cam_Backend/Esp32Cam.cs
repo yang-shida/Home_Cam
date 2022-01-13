@@ -38,7 +38,7 @@ namespace Home_Cam_Backend
         public Stream CamStream { get; set; }
         public byte[] StreamBuffer { get; set; }
         public int RemainingData { get; set; }
-        public static int StreamBufferSize = 1024*50;
+        public static int StreamBufferSize = 1024 * 50;
         public ParsingStatus MyParsingStatus { get; set; }
 
         public Esp32Cam(string ip, string id, long cameraTimeMicroSeconds)
@@ -48,7 +48,7 @@ namespace Home_Cam_Backend
             ImageBufferHeadIndex = 0;
             CurrentImageByteIndex = 0;
             ImageBuffer = new();
-            for(int i=0; i<ImageBufferMaxSize; i++)
+            for (int i = 0; i < ImageBufferMaxSize; i++)
             {
                 ImageBuffer.Add(new BufferedImage());
             }
@@ -56,8 +56,8 @@ namespace Home_Cam_Backend
             RemainingData = 0;
             MyParsingStatus = ParsingStatus.LookingForLengthAndTime;
 
-            DiscoverTimeServer= new DateTimeOffset(DateTime.UtcNow);
-            DiscoverTimeCameraMilliseconds = cameraTimeMicroSeconds/1000;
+            DiscoverTimeServer = new DateTimeOffset(DateTime.UtcNow);
+            DiscoverTimeCameraMilliseconds = cameraTimeMicroSeconds / 1000;
         }
         public async Task AdjustFrameSize(int newFrameSizeCode)
         {
@@ -109,31 +109,10 @@ namespace Home_Cam_Backend
             }
         }
 
-        // public async Task<byte[]> GetSingleShot()
-        // {
-        //     try
-        //     {
-        //         HttpResponseMessage imageResult = await httpClient.GetAsync($"http://{IpAddr}/esp32_cam_capture?cb={DateTime.Now.Ticks}");
-        //         byte[] imageArray = await imageResult.Content.ReadAsByteArrayAsync();
-        //         if (ImageBuffer.Count < ImageBufferMaxSize)
-        //         {
-        //             ImageBuffer.Add(imageArray);
-        //             ImageBufferHeadIndex = ImageBuffer.Count - 1;
-        //         }
-        //         else
-        //         {
-        //             int tempHeadIndex = (ImageBufferHeadIndex + 1) % ImageBufferMaxSize;
-        //             ImageBuffer[tempHeadIndex] = imageArray;
-        //             ImageBufferHeadIndex = tempHeadIndex;
-        //         }
-        //         return await Task.FromResult(imageArray);
-        //     }
-        //     catch (Exception e)
-        //     {
-        //         Console.WriteLine(e.ToString());
-        //         throw new Exception("[GetSingleShot] Cannot talk to camera!");
-        //     }
-        // }
+        public async Task<byte[]> GetSingleShot()
+        {
+            return await Task.FromResult(ImageBuffer[ImageBufferHeadIndex].valid ? ImageBuffer[ImageBufferHeadIndex].image : null);
+        }
 
         // http://192.168.1.105:81/esp32_cam_stream
         public async Task<Stream> Streaming()
@@ -168,10 +147,10 @@ namespace Home_Cam_Backend
             client.DefaultRequestHeaders.ConnectionClose = true;
             List<Task<HttpResponseMessage>> requestList = new();
 
-            for(int i=0; i<ipAddrList.Count; i++)
+            for (int i = 0; i < ipAddrList.Count; i++)
             {
                 string CAM_IP = ipAddrList[i];
-                if(CamController.ActiveCameras.Find(camInList => camInList.IpAddr==CAM_IP) is null)
+                if (CamController.ActiveCameras.Find(camInList => camInList.IpAddr == CAM_IP) is null)
                 {
                     requestList.Add(client.GetAsync($"http://{CAM_IP}/who_are_you"));
                 }
@@ -245,14 +224,14 @@ namespace Home_Cam_Backend
 
             }
 
-            if(cameraList.Count==0)
+            if (cameraList.Count == 0)
             {
                 Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] FindCameras: No new camera found.");
             }
 
             Extensions.WriteToLogFile("---------------- Current Active Cameras ----------------");
-            int count=1;
-            foreach(Esp32Cam cam in CamController.ActiveCameras)
+            int count = 1;
+            foreach (Esp32Cam cam in CamController.ActiveCameras)
                 Extensions.WriteToLogFile($"[{count++}] MAC = {cam.UniqueId} and IP = {cam.IpAddr}");
             Extensions.WriteToLogFile("--------------------------------------------------------");
 

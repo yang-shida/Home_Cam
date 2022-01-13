@@ -1,31 +1,44 @@
 ESP32:
-    - in setup, generate a http request to backend to ask for current setting
-        - if get response, update setting
-        - if not, use default setting
 
 Frontend:
-    - refresh camera button
-    - max frame size = 9 to be safe
+    - pages
+        - login
+        - main
+            - sidebar
+                - cam list
+                - all cam view
+                - cam settings
+                    - how much video to keep
+                        - length of time
+                        - or size of disk
+                    - view current server disk space
+                    - cam on/off schedule
+                        - possibly on only when I am not home? (use phone location or phone wifi connection)
+                    
+            - nav bar
+                - refresh camera button
+            - contect area 
+                - list of cameras
+                    - image preview
+                    - name (location)
+                    - ip addr
+                    - mac addr
+                    - wifi strength
+                    - online since xxx
+                    - flash light toggle
+                    - small streaming view
+                - detailed view of one camera
+                    - streaming
+                    - download
+                        - time range selection
+                        - need to know available video times
+                    - frame size setting
+                    - horizontal/verticle flip
+                - card view of all camera streamings
 
 Backend:
-    - on startup, search subnet to find online cameras
-        - for each camera
-            - if its setting exists, update its setting
-            - else, create default setting and update its setting
-    - check every 15 minutes to see if any new camera is online (search subnet)
-        - for each camera
-            - if already running, do nothing
-            - else
-                - if its setting exists, update its setting
-                - else, create default setting and update its setting
-    - when a camera asks for settings, add it (setting and running) if it is not already in system
-    - if receive refresh command from Frontend, search subnet for cameras 
-    - for each camera
-        - download image every 100ms
-            - if download fail, duplicate previous image
-            - if fail more than 10 times in a row, remove this camera since it might be offline
-        - log image info into database
-        - check if capacity is close to full, delete old image if necessary (need to update database)
-
-Response.onstart ???
-    
+    - save image info in database
+    - stream image
+    - delete old image when exceeding storage limit
+    - retrieve video of specific time range (for download)
+    - log when is the video recorded in database

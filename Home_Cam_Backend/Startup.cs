@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FFMediaToolkit;
+using FFMediaToolkit.Decoding;
 using Home_Cam_Backend.BackgroundTasks;
 using Home_Cam_Backend.Repositories;
 using Home_Cam_Backend.Settings;
@@ -72,8 +75,7 @@ namespace Home_Cam_Backend
                 endpoints.MapControllers();
             });
 
-            // await Esp32Cam.FindCameras(repository);
-            
+            FFmpegLoader.FFmpegPath=Directory.GetCurrentDirectory() + "/third_party_lib/ffmpeg_dlls";
         }
     }
 }

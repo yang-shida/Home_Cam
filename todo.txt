@@ -38,7 +38,6 @@ Frontend:
 
 Backend:
     - save image info in database
-    - stream image
     - delete old image when exceeding storage limit
     - retrieve video of specific time range (for download)
     - log when is the video recorded in database

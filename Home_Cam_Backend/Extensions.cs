@@ -5,9 +5,13 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using FFMediaToolkit.Graphics;
 using Home_Cam_Backend.Controllers;
 using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
+
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Home_Cam_Backend
 {
@@ -124,6 +128,11 @@ namespace Home_Cam_Backend
                     Console.SetOut (oldOut);
                 }
             }
+        }
+
+        public static Image<Bgr24> ToBitmap(this ImageData imageData)
+        {
+            return Image.LoadPixelData<Bgr24>(imageData.Data, imageData.ImageSize.Width, imageData.ImageSize.Height);
         }
     }
 }

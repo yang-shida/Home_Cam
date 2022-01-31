@@ -52,7 +52,9 @@ namespace Home_Cam_Backend.Controllers
             while(!Request.HttpContext.RequestAborted.IsCancellationRequested)
             {
 
-                if(cam.ImageBuffer[cam.ImageBufferHeadIndex].valid == false)
+                int imageIndex = cam.ImageBufferHeadIndex;
+
+                if(cam.ImageBuffer[imageIndex].valid == false)
                 {
                     Response.StatusCode = 404;
                     return;
@@ -60,7 +62,7 @@ namespace Home_Cam_Backend.Controllers
 
                 var delay = Task.Delay(100);
 
-                byte[] image = cam.ImageBuffer[cam.ImageBufferHeadIndex].image;
+                byte[] image = cam.ImageBuffer[imageIndex].image;
 
                 string header =
                     "--frame" + "\r\n" +
@@ -78,7 +80,6 @@ namespace Home_Cam_Backend.Controllers
 
             }
 
-            // await Response.StartAsync();
             return;
         }
 

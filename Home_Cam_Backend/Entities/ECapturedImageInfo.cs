@@ -7,8 +7,7 @@ namespace Home_Cam_Backend.Entities
     public record ECapturedImageInfo
     {
         public string CamId { get; init; }
-        public string CamLocation { get; init; }
         public string ImageFileLocation { get; init; }
-        public DateTime CreatedDate { get; init; }
+        public DateTimeOffset CreatedDate { get; init; }
     }
 }

@@ -9,6 +9,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Home_Cam_Backend.Controllers;
 using Microsoft.Extensions.Hosting;
+using Home_Cam_Backend.Repositories;
+using SixLabors.ImageSharp;
+using Home_Cam_Backend.Entities;
 
 namespace Home_Cam_Backend.BackgroundTasks
 {
@@ -19,6 +22,13 @@ namespace Home_Cam_Backend.BackgroundTasks
         private byte[] timeDelimByteArray = Encoding.UTF8.GetBytes("time=");
         private byte[] endDelimByteArray = Encoding.UTF8.GetBytes("X");
         private byte[] jpegStartSeq = {0xFF, 0xD8, 0xFF};
+
+        private readonly ICapturedImagesRepository capturedImageInfoRepository;
+
+        public ImageCaptureBackgroundTask(ICapturedImagesRepository repo)
+        {
+            this.capturedImageInfoRepository=repo;
+        }
 
         private int LengthTimeParser(byte[] buffer, ref int bufferHeadIndex, int bufferLength, ref int length, ref long time)
         {
@@ -275,6 +285,15 @@ namespace Home_Cam_Backend.BackgroundTasks
                                                 // save image
                                                 await File.WriteAllBytesAsync(file.FullName, CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].image);
                                                 
+                                                ECapturedImageInfo newCapturedImageInfo = new(){
+                                                    CamId=CamController.ActiveCameras[i].UniqueId,
+                                                    ImageFileLocation=filePath,
+                                                    CreatedDate=CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].CreatedDate
+                                                };
+
+                                                // Console.WriteLine(newCapturedImageInfo.CreatedDate.ToString());
+
+                                                await capturedImageInfoRepository.CreateImageInfo(newCapturedImageInfo);
                                             }
                                             // corrupted image
                                             else

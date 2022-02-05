@@ -9,5 +9,6 @@ namespace Home_Cam_Backend.Entities
         public string CamId { get; init; }
         public string ImageFileLocation { get; init; }
         public DateTimeOffset CreatedDate { get; init; }
+        public long Size { get; set; }
     }
 }

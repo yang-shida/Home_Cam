@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Home_Cam_Backend.Controllers;
 using Home_Cam_Backend.Repositories;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace Home_Cam_Backend.BackgroundTasks
@@ -14,14 +15,16 @@ namespace Home_Cam_Backend.BackgroundTasks
     {   
         private Timer MyTimer;
         private readonly ICamSettingsRepository repository;
+        private readonly IConfiguration Configuration;
 
-        public SearchCamBackgroundTask(ICamSettingsRepository repo)
+        public SearchCamBackgroundTask(IConfiguration configuration, ICamSettingsRepository repo)
         {
             repository = repo;
+            Configuration=configuration;
         }
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            MyTimer=new(SearchCameras, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+            MyTimer=new(SearchCameras, null, TimeSpan.Zero, TimeSpan.FromMinutes(Configuration.GetSection("BackgroundTasksTimingSettings").GetValue<int>("SearchCamerasMinutes")));
             return Task.CompletedTask;
         }
 

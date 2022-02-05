@@ -8,10 +8,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Home_Cam_Backend.Controllers;
-using Microsoft.Extensions.Hosting;
-using Home_Cam_Backend.Repositories;
-using SixLabors.ImageSharp;
 using Home_Cam_Backend.Entities;
+using Home_Cam_Backend.Repositories;
+using Home_Cam_Backend.Settings;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using SixLabors.ImageSharp;
 
 namespace Home_Cam_Backend.BackgroundTasks
 {
@@ -21,13 +23,15 @@ namespace Home_Cam_Backend.BackgroundTasks
         private byte[] lengthDelimByteArray = Encoding.UTF8.GetBytes("length=");
         private byte[] timeDelimByteArray = Encoding.UTF8.GetBytes("time=");
         private byte[] endDelimByteArray = Encoding.UTF8.GetBytes("X");
-        private byte[] jpegStartSeq = {0xFF, 0xD8, 0xFF};
+        private byte[] jpegStartSeq = { 0xFF, 0xD8, 0xFF };
 
         private readonly ICapturedImagesRepository capturedImageInfoRepository;
+        private readonly IConfiguration Configuration;
 
-        public ImageCaptureBackgroundTask(ICapturedImagesRepository repo)
+        public ImageCaptureBackgroundTask(ICapturedImagesRepository repo, IConfiguration configuration)
         {
-            this.capturedImageInfoRepository=repo;
+            this.capturedImageInfoRepository = repo;
+            this.Configuration = configuration;
         }
 
         private int LengthTimeParser(byte[] buffer, ref int bufferHeadIndex, int bufferLength, ref int length, ref long time)
@@ -41,7 +45,7 @@ namespace Home_Cam_Backend.BackgroundTasks
             var i = ro.IndexOf(lengthDelimByteArray);
             if (i == -1)
             {
-                bufferHeadIndex=bufferBeginningIndex+bufferLength;
+                bufferHeadIndex = bufferBeginningIndex + bufferLength;
                 return -1;
             }
 
@@ -49,13 +53,13 @@ namespace Home_Cam_Backend.BackgroundTasks
 
             ro = ro.Slice(i + 7);
             dataIndex += (i + 7);
-            bufferHeadIndex=dataIndex;
+            bufferHeadIndex = dataIndex;
 
             // find length X
             i = ro.IndexOf(endDelimByteArray);
             if (i == -1)
             {
-                bufferHeadIndex=bufferBeginningIndex+bufferLength;
+                bufferHeadIndex = bufferBeginningIndex + bufferLength;
                 return -1;
             }
 
@@ -63,25 +67,25 @@ namespace Home_Cam_Backend.BackgroundTasks
 
             ro = ro.Slice(i + 1);
             dataIndex += (i + 1);
-            bufferHeadIndex=dataIndex;
+            bufferHeadIndex = dataIndex;
 
             // find time
             i = ro.IndexOf(timeDelimByteArray);
             if (i == -1)
             {
-                bufferHeadIndex=bufferBeginningIndex+bufferLength;
+                bufferHeadIndex = bufferBeginningIndex + bufferLength;
                 return -1;
             }
 
             ro = ro.Slice(i + 5);
             dataIndex += (i + 5);
-            bufferHeadIndex=dataIndex;
+            bufferHeadIndex = dataIndex;
 
             // find time X
             i = ro.IndexOf(endDelimByteArray);
             if (i == -1)
             {
-                bufferHeadIndex=bufferBeginningIndex+bufferLength;
+                bufferHeadIndex = bufferBeginningIndex + bufferLength;
                 return -1;
             }
 
@@ -89,10 +93,10 @@ namespace Home_Cam_Backend.BackgroundTasks
 
             ro = ro.Slice(i + 1);
             dataIndex += (i + 1);
-            bufferHeadIndex=dataIndex;
+            bufferHeadIndex = dataIndex;
 
             // check if the chunk is possibly aligned correctly
-            if(bufferHeadIndex==bufferBeginningIndex+bufferLength || buffer[bufferHeadIndex]==0xFF)
+            if (bufferHeadIndex == bufferBeginningIndex + bufferLength || buffer[bufferHeadIndex] == 0xFF)
             {
                 return dataIndex;
             }
@@ -105,16 +109,17 @@ namespace Home_Cam_Backend.BackgroundTasks
 
         private async void DoWork(CancellationToken stoppingToken)
         {
-            string ImageFolderPath = "D:/Download/Test_Images";
+            string ImageFolderPath = Configuration.GetSection("ImageStorageSettings").GetValue<string>("Path");
+
             int singleReadTimeoutLimitMilliseconds = 50;
 
             while (!stoppingToken.IsCancellationRequested)
             {
 
+                var delayTask = Task.Delay(Configuration.GetSection("BackgroundTasksTimingSettings").GetValue<int>("ImageCaptureMillisecs"));
+
                 // read appropiate number of bytes based on state
                 List<Task<int>> readBufferResult = new();
-
-                
 
                 for (int i = 0; i < CamController.ActiveCameras.Count; i++)
                 {
@@ -160,10 +165,10 @@ namespace Home_Cam_Backend.BackgroundTasks
                     int bytesRead = 0;
                     try
                     {
-                        using ((new CancellationTokenSource(singleReadTimeoutLimitMilliseconds)).Token.Register(()=> CamController.ActiveCameras[i].CamStream.Close()))
+                        using ((new CancellationTokenSource(singleReadTimeoutLimitMilliseconds)).Token.Register(() => CamController.ActiveCameras[i].CamStream.Close()))
                         {
                             bytesRead = await readBufferResult[i];
-                            if(bytesRead==0)
+                            if (bytesRead == 0)
                             {
                                 throw new Exception();
                             }
@@ -187,15 +192,15 @@ namespace Home_Cam_Backend.BackgroundTasks
                             i--;
                         }
                     }
-                    
+
                     if (bytesRead > 0)
                     {
                         // using(FileStream ostrm = new("D:/Download/RawResponse1.txt", FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write))
                         // {
                         //     await ostrm.WriteAsync(CamController.ActiveCameras[i].StreamBuffer, 0, bytesRead);
                         // }
-                        int bufferHeadIndex=0;
-                        while(bufferHeadIndex<bytesRead)
+                        int bufferHeadIndex = 0;
+                        while (bufferHeadIndex < bytesRead)
                         {
                             // Console.WriteLine("parsing");
                             switch (CamController.ActiveCameras[i].MyParsingStatus)
@@ -205,7 +210,7 @@ namespace Home_Cam_Backend.BackgroundTasks
                                         // Console.WriteLine("parse length and time");
                                         int dataLength = 0;
                                         long imageTime = 0;
-                                        int dataIndex = LengthTimeParser(CamController.ActiveCameras[i].StreamBuffer, ref bufferHeadIndex, bytesRead-bufferHeadIndex, ref dataLength, ref imageTime);
+                                        int dataIndex = LengthTimeParser(CamController.ActiveCameras[i].StreamBuffer, ref bufferHeadIndex, bytesRead - bufferHeadIndex, ref dataLength, ref imageTime);
                                         if (dataIndex != -1)
                                         {
                                             CamController.ActiveCameras[i].RemainingData = dataLength;
@@ -231,8 +236,8 @@ namespace Home_Cam_Backend.BackgroundTasks
 
                                         int dataLength = CamController.ActiveCameras[i].RemainingData;
 
-                                        int currentDataLength = dataLength>(bytesRead - bufferHeadIndex)?(bytesRead - bufferHeadIndex):dataLength;
-                                        
+                                        int currentDataLength = dataLength > (bytesRead - bufferHeadIndex) ? (bytesRead - bufferHeadIndex) : dataLength;
+
                                         Array.Copy(
                                             CamController.ActiveCameras[i].StreamBuffer,
                                             bufferHeadIndex,
@@ -241,7 +246,7 @@ namespace Home_Cam_Backend.BackgroundTasks
                                             currentDataLength
                                         );
 
-                                        bufferHeadIndex+=currentDataLength;
+                                        bufferHeadIndex += currentDataLength;
 
                                         CamController.ActiveCameras[i].CurrentImageByteIndex += currentDataLength;
                                         CamController.ActiveCameras[i].RemainingData -= currentDataLength;
@@ -254,14 +259,14 @@ namespace Home_Cam_Backend.BackgroundTasks
                                             // reset curr image buffer pointer
                                             CamController.ActiveCameras[i].CurrentImageByteIndex = 0;
 
-                                            int imageLen=CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image.Length;
+                                            int imageLen = CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image.Length;
 
                                             // check if this JPEG is valid
-                                            if( CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[0]==0xFF &&
-                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[1]==0xD8 &&
-                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[2]==0xFF &&
-                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[imageLen-2]==0xFF &&
-                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[imageLen-1]==0xD9
+                                            if (CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[0] == 0xFF &&
+                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[1] == 0xD8 &&
+                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[2] == 0xFF &&
+                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[imageLen - 2] == 0xFF &&
+                                                CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image[imageLen - 1] == 0xD9
                                             )
                                             {
                                                 // make this image valid
@@ -275,7 +280,7 @@ namespace Home_Cam_Backend.BackgroundTasks
 
                                                 string rawMacAddr = CamController.ActiveCameras[i].UniqueId;
                                                 Regex pattern = new Regex("[:]");
-                                                rawMacAddr=pattern.Replace(rawMacAddr, "");
+                                                rawMacAddr = pattern.Replace(rawMacAddr, "");
 
                                                 string filePath = $"{ImageFolderPath}/{rawMacAddr}/{(new DateTimeOffset(DateTime.UtcNow)).ToUnixTimeMilliseconds()}.jpg";
 
@@ -284,11 +289,13 @@ namespace Home_Cam_Backend.BackgroundTasks
 
                                                 // save image
                                                 await File.WriteAllBytesAsync(file.FullName, CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].image);
-                                                
-                                                ECapturedImageInfo newCapturedImageInfo = new(){
-                                                    CamId=CamController.ActiveCameras[i].UniqueId,
-                                                    ImageFileLocation=filePath,
-                                                    CreatedDate=CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].CreatedDate
+
+                                                ECapturedImageInfo newCapturedImageInfo = new()
+                                                {
+                                                    CamId = CamController.ActiveCameras[i].UniqueId,
+                                                    ImageFileLocation = filePath,
+                                                    CreatedDate = CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].CreatedDate,
+                                                    Size = CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].image.Length
                                                 };
 
                                                 // Console.WriteLine(newCapturedImageInfo.CreatedDate.ToString());
@@ -300,7 +307,7 @@ namespace Home_Cam_Backend.BackgroundTasks
                                             {
                                                 CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image = null;
                                             }
-                                            
+
                                         }
 
                                         break;
@@ -315,7 +322,7 @@ namespace Home_Cam_Backend.BackgroundTasks
 
                 }
 
-                await Task.Delay(100);
+                await delayTask;
             }
 
             return;
@@ -323,7 +330,7 @@ namespace Home_Cam_Backend.BackgroundTasks
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Task.Run(()=>DoWork(stoppingToken));
+            await Task.Run(() => DoWork(stoppingToken));
         }
 
     }

@@ -38,8 +38,10 @@ namespace Home_Cam_Backend
         public Stream CamStream { get; set; }
         public byte[] StreamBuffer { get; set; }
         public int RemainingData { get; set; }
-        public static int StreamBufferSize = 1024 * 50;
+        public static int StreamBufferSize = 1024 * 1024;
         public ParsingStatus MyParsingStatus { get; set; }
+        public static int MaxRecoverTimeout = 30;
+        public int RecoverTimeout { get; set; }
 
         public Esp32Cam(string ip, string id, long cameraTimeMicroSeconds)
         {
@@ -58,6 +60,7 @@ namespace Home_Cam_Backend
 
             DiscoverTimeServer = new DateTimeOffset(DateTime.UtcNow);
             DiscoverTimeCameraMilliseconds = cameraTimeMicroSeconds / 1000;
+            RecoverTimeout = MaxRecoverTimeout;
         }
         public async Task AdjustFrameSize(int newFrameSizeCode)
         {

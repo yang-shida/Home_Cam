@@ -115,9 +115,6 @@ namespace Home_Cam_Backend.BackgroundTasks
 
             while (!stoppingToken.IsCancellationRequested)
             {
-
-                var delayTask = Task.Delay(Configuration.GetSection("BackgroundTasksTimingSettings").GetValue<int>("ImageCaptureMillisecs"));
-
                 // read appropiate number of bytes based on state
                 List<Task<int>> readBufferResult = new();
 
@@ -170,18 +167,28 @@ namespace Home_Cam_Backend.BackgroundTasks
                             bytesRead = await readBufferResult[i];
                             if (bytesRead == 0)
                             {
-                                throw new Exception();
+                                CamController.ActiveCameras[i].RecoverTimeout--;
+                                if(CamController.ActiveCameras[i].RecoverTimeout == 0)
+                                {
+                                    throw new Exception();
+                                }
+                            }
+                            else
+                            {
+                                CamController.ActiveCameras[i].RecoverTimeout = Esp32Cam.MaxRecoverTimeout;
                             }
                         }
                     }
                     catch
                     {
+                        // Console.WriteLine(CamController.ActiveCameras[i].UniqueId);
                         // try to get a new stream
                         try
                         {
                             // Console.WriteLine("try to recover");
                             await CamController.ActiveCameras[i].Streaming();
                             // Console.WriteLine("recover success");
+                            CamController.ActiveCameras[i].RecoverTimeout = Esp32Cam.MaxRecoverTimeout;
                         }
                         catch
                         {
@@ -195,9 +202,11 @@ namespace Home_Cam_Backend.BackgroundTasks
 
                     if (bytesRead > 0)
                     {
-                        // using(FileStream ostrm = new("D:/Download/RawResponse1.txt", FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write))
+                        // using(FileStream ostrm = new("D:/Download/RawResponse2.txt", FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write))
                         // {
                         //     await ostrm.WriteAsync(CamController.ActiveCameras[i].StreamBuffer, 0, bytesRead);
+                        //     byte[] newline=Encoding.UTF8.GetBytes("\nV15V\n");
+                        //     await ostrm.WriteAsync(newline);
                         // }
                         int bufferHeadIndex = 0;
                         while (bufferHeadIndex < bytesRead)
@@ -305,6 +314,7 @@ namespace Home_Cam_Backend.BackgroundTasks
                                             // corrupted image
                                             else
                                             {
+                                                // Console.WriteLine("Bad image");
                                                 CamController.ActiveCameras[i].ImageBuffer[nextImageBufferIndex].image = null;
                                             }
 
@@ -321,7 +331,7 @@ namespace Home_Cam_Backend.BackgroundTasks
                     }
 
                 }
-
+                var delayTask = Task.Delay(Configuration.GetSection("BackgroundTasksTimingSettings").GetValue<int>("ImageCaptureMillisecs"));
                 await delayTask;
             }
 

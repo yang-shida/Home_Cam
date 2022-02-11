@@ -83,5 +83,28 @@ namespace Home_Cam_Backend.Controllers
             return;
         }
 
+        [HttpGet("{camId}/preview")]
+        public async Task<ActionResult<byte[]>> GetPreviewImage(string camId)
+        {
+            
+            int camIndex = ActiveCameras.FindIndex(camInList => camInList.UniqueId==camId);
+            
+            // this cam is not active
+            if(camIndex==-1)
+            {
+                return NotFound();
+            }
+
+            // no valid image
+            if(!ActiveCameras[camIndex].ImageBuffer[ActiveCameras[camIndex].ImageBufferHeadIndex].valid)
+            {
+                return NotFound();
+            }
+
+            Response.ContentType="image/jpeg";
+            await Response.Body.WriteAsync(ActiveCameras[camIndex].ImageBuffer[ActiveCameras[camIndex].ImageBufferHeadIndex].image);
+
+            return Ok();
+        }
     }
 }

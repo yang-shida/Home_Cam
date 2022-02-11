@@ -39,6 +39,9 @@ namespace Home_Cam_Backend.BackgroundTasks
         {
             long currSize = await capturedImageInfoRepository.GetTotalSize();
 
+            Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] Checking storage size. Current size = {Math.Round(((double)currSize)/1024/1024,3)} MB");
+
+
             // limit not hit, do nothing
             if (currSize < maxImageStorageSpaceBytes)
             {
@@ -49,6 +52,8 @@ namespace Home_Cam_Backend.BackgroundTasks
             long sizeToDelete = currSize - sizeAfterDeleting;
 
             List<ECapturedImageInfo> currImageBatch = new();
+
+            int count = 0;
 
             do
             {
@@ -75,9 +80,10 @@ namespace Home_Cam_Backend.BackgroundTasks
                 }
                 // remove info from DB
                 await capturedImageInfoRepository.DeleteImageInfos(fromDate, toDate);
+                count+=numOfImagePerBatch;
             } while (sizeToDelete > 0);
 
-
+            Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] Deleted {count} images.");
 
         }
     }

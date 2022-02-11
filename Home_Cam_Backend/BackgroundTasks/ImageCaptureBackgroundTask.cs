@@ -121,37 +121,46 @@ namespace Home_Cam_Backend.BackgroundTasks
                 for (int i = 0; i < CamController.ActiveCameras.Count; i++)
                 {
                     // Console.WriteLine("send req");
-                    switch (CamController.ActiveCameras[i].MyParsingStatus)
+                    try
                     {
-                        case Esp32Cam.ParsingStatus.LookingForLengthAndTime:
-                            {
-                                readBufferResult.Add(
-                                    CamController.ActiveCameras[i].CamStream.ReadAsync(
-                                        CamController.ActiveCameras[i].StreamBuffer,
-                                        0,
-                                        Esp32Cam.StreamBufferSize
-                                    )
-                                );
-                                break;
-                            }
-                        case Esp32Cam.ParsingStatus.GettingData:
-                            {
-                                readBufferResult.Add(
-                                    CamController.ActiveCameras[i].CamStream.ReadAsync(
-                                        CamController.ActiveCameras[i].StreamBuffer,
-                                        0,
-                                        Esp32Cam.StreamBufferSize > CamController.ActiveCameras[i].RemainingData ?
-                                            CamController.ActiveCameras[i].RemainingData :
+                        switch (CamController.ActiveCameras[i].MyParsingStatus)
+                        {
+                            case Esp32Cam.ParsingStatus.LookingForLengthAndTime:
+                                {
+                                    readBufferResult.Add(
+                                        CamController.ActiveCameras[i].CamStream.ReadAsync(
+                                            CamController.ActiveCameras[i].StreamBuffer,
+                                            0,
                                             Esp32Cam.StreamBufferSize
-                                    )
-                                );
-                                break;
-                            }
-                        default:
-                            {
-                                break;
-                            }
+                                        )
+                                    );
+                                    break;
+                                }
+                            case Esp32Cam.ParsingStatus.GettingData:
+                                {
+                                    readBufferResult.Add(
+                                        CamController.ActiveCameras[i].CamStream.ReadAsync(
+                                            CamController.ActiveCameras[i].StreamBuffer,
+                                            0,
+                                            Esp32Cam.StreamBufferSize > CamController.ActiveCameras[i].RemainingData ?
+                                                CamController.ActiveCameras[i].RemainingData :
+                                                Esp32Cam.StreamBufferSize
+                                        )
+                                    );
+                                    break;
+                                }
+                            default:
+                                {
+                                    break;
+                                }
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(CamController.ActiveCameras[i].UniqueId);
+                        Console.WriteLine(e.ToString());
+                    }
+
                 }
 
 
@@ -168,7 +177,7 @@ namespace Home_Cam_Backend.BackgroundTasks
                             if (bytesRead == 0)
                             {
                                 CamController.ActiveCameras[i].RecoverTimeout--;
-                                if(CamController.ActiveCameras[i].RecoverTimeout == 0)
+                                if (CamController.ActiveCameras[i].RecoverTimeout == 0)
                                 {
                                     throw new Exception();
                                 }
@@ -291,7 +300,8 @@ namespace Home_Cam_Backend.BackgroundTasks
                                                 Regex pattern = new Regex("[:]");
                                                 rawMacAddr = pattern.Replace(rawMacAddr, "");
 
-                                                string filePath = $"{ImageFolderPath}/{rawMacAddr}/{(new DateTimeOffset(DateTime.UtcNow)).ToUnixTimeMilliseconds()}.jpg";
+                                                // string filePath = $"{ImageFolderPath}\\{rawMacAddr}\\{(new DateTimeOffset(DateTime.UtcNow)).ToUnixTimeMilliseconds()}.jpg";
+                                                string filePath = $"{ImageFolderPath}\\{rawMacAddr}\\{CamController.ActiveCameras[i].ImageBuffer[CamController.ActiveCameras[i].ImageBufferHeadIndex].CreatedDate.ToUnixTimeMilliseconds()}.jpg";
 
                                                 System.IO.FileInfo file = new System.IO.FileInfo(filePath);
                                                 file.Directory.Create();
@@ -338,9 +348,12 @@ namespace Home_Cam_Backend.BackgroundTasks
             return;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Task.Run(() => DoWork(stoppingToken));
+            // await Task.Run(() => DoWork(stoppingToken));
+
+            DoWork(stoppingToken);
+            return Task.CompletedTask;
         }
 
     }

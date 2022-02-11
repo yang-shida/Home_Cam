@@ -84,7 +84,7 @@ namespace Home_Cam_Backend.Controllers
         }
 
         [HttpGet("{camId}/preview")]
-        public async Task<ActionResult<byte[]>> GetPreviewImage(string camId)
+        public async Task<ActionResult> GetPreviewImage(string camId)
         {
             
             int camIndex = ActiveCameras.FindIndex(camInList => camInList.UniqueId==camId);
@@ -104,7 +104,7 @@ namespace Home_Cam_Backend.Controllers
             Response.ContentType="image/jpeg";
             await Response.Body.WriteAsync(ActiveCameras[camIndex].ImageBuffer[ActiveCameras[camIndex].ImageBufferHeadIndex].image);
 
-            return Ok();
+            return new EmptyResult();
         }
     }
 }

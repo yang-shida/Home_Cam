@@ -78,6 +78,34 @@ namespace Home_Cam_Backend.Repositories
             var doc = await (await capturedImageInfoCollection.AggregateAsync<ECapturedImageInfo>(pipeline)).ToListAsync();
 
             return doc;
-        }   
+        }
+
+        public async Task<DateTimeOffset> GetOldestImageDate(string camId)
+        {
+            var match = new BsonDocument
+                                {
+                                    {
+                                        "$match",
+                                        new BsonDocument
+                                            {
+                                                {
+                                                    "CamId",
+                                                    new BsonDocument {{"$eq", camId}}
+                                                }
+                                            }
+                                    }
+                                };
+            var sort = new BsonDocument
+                            {
+                                {
+                                    "$sort",
+                                    new BsonDocument {{"CreatedDate", 1}}
+                                }
+                            };
+            var limit = new BsonDocument {{"$limit", 1}};
+            var pipeline = new[]{match, sort, limit};
+            var doc = await (await capturedImageInfoCollection.AggregateAsync<ECapturedImageInfo>(pipeline)).SingleOrDefaultAsync();
+            return doc.CreatedDate;
+        }
     }
 }

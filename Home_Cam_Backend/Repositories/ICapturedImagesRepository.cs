@@ -13,5 +13,6 @@ namespace Home_Cam_Backend.Repositories
         Task DeleteImageInfos(DateTimeOffset beginDateTime, DateTimeOffset endDateTime);
         Task<long> GetTotalSize();
         Task<List<ECapturedImageInfo>> GetOldestN(int N);
+        Task<DateTimeOffset> GetOldestImageDate(string camId);
     }
 }

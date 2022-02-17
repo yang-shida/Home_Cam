@@ -26,10 +26,14 @@ namespace Home_Cam_Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<CamDto>>> GetActiveCameras()
+        public async Task<ActionResult<List<CamDto>>> GetActiveCameras(bool needRescan = false)
         {
             // Extensions.WriteToLogFile("Find cameras from web api.");
-            List<Esp32Cam> camList = await Esp32Cam.FindCameras(repository);
+            if(needRescan)
+            {
+                List<Esp32Cam> camList = await Esp32Cam.FindCameras(repository);
+            }
+           
 
             return ActiveCameras.Select(cam=>cam.AsDto()).ToList();
         }

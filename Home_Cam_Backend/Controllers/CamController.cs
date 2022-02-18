@@ -10,6 +10,7 @@ using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
 using Home_Cam_Backend.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Home_Cam_Backend.Controllers
 {
@@ -19,13 +20,15 @@ namespace Home_Cam_Backend.Controllers
     {
         private readonly ICamSettingsRepository repository;
         private readonly ICapturedImagesRepository capturedImagesRepository;
+        private readonly IConfiguration configuration;
         public static List<Esp32Cam> ActiveCameras = new();
 
 
-        public CamController(ICamSettingsRepository repo, ICapturedImagesRepository capturedImagesRepository)
+        public CamController(ICamSettingsRepository repo, ICapturedImagesRepository capturedImagesRepository, IConfiguration configuration)
         {
             this.repository = repo;
             this.capturedImagesRepository = capturedImagesRepository;
+            this.configuration=configuration;
         }
 
         [HttpGet]
@@ -159,6 +162,14 @@ namespace Home_Cam_Backend.Controllers
             await Response.Body.WriteAsync(ActiveCameras[camIndex].ImageBuffer[ActiveCameras[camIndex].ImageBufferHeadIndex].image);
 
             return new EmptyResult();
+        }
+
+        [HttpGet("{camId}/available_recording_time_intervals")]
+        public async Task<ActionResult<List<TimeIntervalDto>>> GetAvailableRecordingTimeIntervals(string camId, long startTimeUtc, long timeLengthMillis)
+        {
+            long thresholdMillis = configuration.GetSection("CamControllerSettings").GetValue<long>("DistinctVideosThresholdSeconds")*1000;
+            List<TimeIntervalDto> timeIntervals = await capturedImagesRepository.GetRecordedTimeIntervals(camId, startTimeUtc, timeLengthMillis, thresholdMillis);
+            return timeIntervals;
         }
     }
 }

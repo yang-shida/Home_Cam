@@ -24,7 +24,7 @@ namespace Home_Cam_Backend.BackgroundTasks
         {
             this.Configuration = configuration;
             this.capturedImageInfoRepository = repo;
-            maxImageStorageSpaceBytes = Configuration.GetSection("ImageStorageSettings").GetValue<long>("MaxSpaceBytes");
+            maxImageStorageSpaceBytes = Configuration.GetSection("ImageStorageSettings").GetValue<long>("MaxSpaceGBs")*1024*1024*1024;
             sizeAfterDeleting = (long)(maxImageStorageSpaceBytes * (1 - Configuration.GetSection("ImageStorageSettings").GetValue<double>("PercentToDeleteWhenFull") / 100));
             numOfImagePerBatch = Configuration.GetSection("ImageStorageSettings").GetValue<int>("BatchSize");
         }

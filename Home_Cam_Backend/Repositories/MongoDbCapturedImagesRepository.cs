@@ -70,7 +70,7 @@ namespace Home_Cam_Backend.Repositories
                             {
                                 {
                                     "$sort",
-                                    new BsonDocument {{"CreatedDate", 1}}
+                                    new BsonDocument {{"CreatedDate.0", 1}}
                                 }
                             };
             var limit = new BsonDocument { { "$limit", N } };
@@ -101,7 +101,7 @@ namespace Home_Cam_Backend.Repositories
                             {
                                 {
                                     "$sort",
-                                    new BsonDocument {{"CreatedDate", 1}}
+                                    new BsonDocument {{"CreatedDate.0", 1}}
                                 }
                             };
             var limit = new BsonDocument { { "$limit", 1 } };
@@ -148,7 +148,7 @@ namespace Home_Cam_Backend.Repositories
                             {
                                 {
                                     "$sort",
-                                    new BsonDocument {{"CreatedDate", 1}}
+                                    new BsonDocument {{"CreatedDate.0", 1}}
                                 }
                             };
             var project = new BsonDocument

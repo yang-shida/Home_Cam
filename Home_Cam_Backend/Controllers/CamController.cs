@@ -94,7 +94,7 @@ namespace Home_Cam_Backend.Controllers
                 else
                 {
                     long currTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    Console.WriteLine($"FPS: {1000/((double)(currTime-lastTime))}");
+                    // Console.WriteLine($"FPS: {1000/((double)(currTime-lastTime))}");
                     currentTimeUtc += (currTime-lastTime);
                     lastTime=currTime;
                     // fetch next image info from DB

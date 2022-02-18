@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -103,8 +104,22 @@ namespace Home_Cam_Backend.Repositories
                                 }
                             };
             var limit = new BsonDocument {{"$limit", 1}};
-            var pipeline = new[]{match, sort, limit};
-            var doc = await (await capturedImageInfoCollection.AggregateAsync<ECapturedImageInfo>(pipeline)).SingleOrDefaultAsync();
+            var project = new BsonDocument 
+                            {
+                                {
+                                    "$project", new BsonDocument 
+                                        {
+                                            {
+                                                "CreatedDate", 1
+                                            },
+                                            {
+                                                "_id", 0
+                                            }
+                                        }
+                                }
+                            };
+            var pipeline = new[]{match, sort, limit, project};
+            var doc = await (await capturedImageInfoCollection.AggregateAsync<ImageInfoCreatedDateDto>(pipeline)).SingleOrDefaultAsync();
             return doc.CreatedDate;
         }
     }

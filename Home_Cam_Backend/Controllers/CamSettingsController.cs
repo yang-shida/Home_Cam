@@ -12,24 +12,24 @@ namespace Home_Cam_Backend.Controllers
 {
     [ApiController]
     [Route("api/camSettings")]
-    public class CamSettingsController: ControllerBase
+    public class CamSettingsController : ControllerBase
     {
         private readonly ICamSettingsRepository repository;
 
         public CamSettingsController(ICamSettingsRepository repo)
         {
-            this.repository=repo;
+            this.repository = repo;
         }
 
         [HttpGet("{uniqueId}")]
-        public async Task<ActionResult<CamSettingDto>> GetCamSettingAsync(string uniqueId, string ipAddr=null, long? camTime=null)
+        public async Task<ActionResult<CamSettingDto>> GetCamSettingAsync(string uniqueId, string ipAddr = null, long? camTime = null)
         {
             Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] GetCamSettingAsync with MAC = {uniqueId}, IP = {ipAddr ?? "Null"} and camTime = {camTime ?? -1}");
-            
+
             // request comes from a camera, add it to ActiveCameras list if is not in the list
-            if(ipAddr is not null && camTime is not null)
+            if (ipAddr is not null && camTime is not null)
             {
-                if(CamController.ActiveCameras.Find(camInList => camInList.UniqueId==uniqueId) is null)
+                if (CamController.ActiveCameras.Find(camInList => camInList.UniqueId == uniqueId) is null)
                 {
                     Esp32Cam tempCam = new Esp32Cam(ipAddr, uniqueId, (long)camTime);
                     await tempCam.Streaming();
@@ -37,32 +37,40 @@ namespace Home_Cam_Backend.Controllers
                 }
                 else
                 {
-                    int camIndex = CamController.ActiveCameras.IndexOf(CamController.ActiveCameras.Find(camInList => camInList.UniqueId==uniqueId));
-                    if(CamController.ActiveCameras[camIndex].IpAddr != ipAddr)
+                    int camIndex = CamController.ActiveCameras.IndexOf(CamController.ActiveCameras.Find(camInList => camInList.UniqueId == uniqueId));
+                    if (CamController.ActiveCameras[camIndex].IpAddr != ipAddr)
                     {
                         CamController.ActiveCameras[camIndex].IpAddr = ipAddr;
                         await CamController.ActiveCameras.Last().Streaming();
                     }
                 }
-                
+
             }
 
             var camSetting = await repository.GetCamSettingAsync(uniqueId);
             // if this is a new camera, create a new setting entry and return the default
-            if(camSetting is null)
+            if (camSetting is null)
             {
-                EEsp32CamSetting defaultCamSetting = new()
+                if (ipAddr is not null && camTime is not null)
                 {
-                    UniqueId=uniqueId,
-                    Location="Default Location",
-                    FrameSize=6,
-                    FlashLightOn=false,
-                    HorizontalMirror=false,
-                    VerticalMirror=false
-                };
-                await repository.CreateCamSettingAsync(defaultCamSetting);
+                    EEsp32CamSetting defaultCamSetting = new()
+                    {
+                        UniqueId = uniqueId,
+                        Location = "Default Location",
+                        FrameSize = 6,
+                        FlashLightOn = false,
+                        HorizontalMirror = false,
+                        VerticalMirror = false
+                    };
+                    await repository.CreateCamSettingAsync(defaultCamSetting);
 
-                return defaultCamSetting.AsDto();
+                    return defaultCamSetting.AsDto();
+                }
+                else
+                {
+                    return NotFound();
+                }
+
             }
             // return existing setting
             else
@@ -76,7 +84,7 @@ namespace Home_Cam_Backend.Controllers
         {
             // check if the camera already exists
             var existingCamSetting = await repository.GetCamSettingAsync(camSettingDto.UniqueId);
-            if(existingCamSetting is not null)
+            if (existingCamSetting is not null)
             {
                 return Conflict($"{camSettingDto.UniqueId} already exists!");
             }
@@ -84,12 +92,12 @@ namespace Home_Cam_Backend.Controllers
             // create new
             EEsp32CamSetting camSetting = new()
             {
-                UniqueId=camSettingDto.UniqueId,
-                Location=camSettingDto.Location,
-                FrameSize=camSettingDto.FrameSize,
-                FlashLightOn=camSettingDto.FlashLightOn,
-                HorizontalMirror=camSettingDto.HorizontalMirror,
-                VerticalMirror=camSettingDto.VerticalMirror
+                UniqueId = camSettingDto.UniqueId,
+                Location = camSettingDto.Location,
+                FrameSize = camSettingDto.FrameSize,
+                FlashLightOn = camSettingDto.FlashLightOn,
+                HorizontalMirror = camSettingDto.HorizontalMirror,
+                VerticalMirror = camSettingDto.VerticalMirror
             };
 
             await repository.CreateCamSettingAsync(camSetting);
@@ -102,25 +110,25 @@ namespace Home_Cam_Backend.Controllers
         {
             // check if the cam exists
             var existingCamSetting = await repository.GetCamSettingAsync(camSettingDto.UniqueId);
-            if(existingCamSetting is null)
+            if (existingCamSetting is null)
             {
                 return NotFound($"{camSettingDto.UniqueId} does not exist!");
             }
 
             EEsp32CamSetting camSetting = new()
             {
-                UniqueId=camSettingDto.UniqueId,
-                Location=camSettingDto.Location,
-                FrameSize=camSettingDto.FrameSize,
-                FlashLightOn=camSettingDto.FlashLightOn,
-                HorizontalMirror=camSettingDto.HorizontalMirror,
-                VerticalMirror=camSettingDto.VerticalMirror
+                UniqueId = camSettingDto.UniqueId,
+                Location = camSettingDto.Location,
+                FrameSize = camSettingDto.FrameSize,
+                FlashLightOn = camSettingDto.FlashLightOn,
+                HorizontalMirror = camSettingDto.HorizontalMirror,
+                VerticalMirror = camSettingDto.VerticalMirror
             };
 
             await repository.UpdateCamSettingAsync(camSetting);
 
             return camSetting.AsDto();
-            
+
 
         }
     }

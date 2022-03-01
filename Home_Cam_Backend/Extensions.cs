@@ -29,12 +29,18 @@ namespace Home_Cam_Backend
                 var unicastAddresses = ipInterface.UnicastAddresses;
                 if(gatewayAddresses.Count>0)
                 {
-                    gatewayAddress=gatewayAddresses[0].Address.ToString();
+                    gatewayAddress=gatewayAddresses[0].Address.AddressFamily.ToString()=="InterNetwork"?
+                                    gatewayAddresses[0].Address.ToString():
+                                    "N/A";
                     foreach(var unicastAddress in unicastAddresses)
                     {
                         if(unicastAddress.Address.AddressFamily.ToString()=="InterNetwork")
                         {
                             subnetMask=unicastAddress.IPv4Mask.ToString();
+                        }
+                        else
+                        {
+                            subnetMask="N/A";
                         }
                     }
                 }
@@ -60,7 +66,11 @@ namespace Home_Cam_Backend
             List<string> ipList = new();
 
             (string gatewayAddress, string subnetMask) = getGatewayAddressAndSubnetMask();
-            
+
+            if(gatewayAddress=="N/A" || subnetMask=="N/A"){
+                return Task.FromResult(ipList);
+            }
+
             // oct[0].oct[1].oct[2].oct[3]
             int[] subnetOct = ipAddrToOcts(subnetMask);
             int[] gatewayOct = ipAddrToOcts(gatewayAddress);

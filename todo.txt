@@ -41,3 +41,4 @@ Backend:
     - delete old image when exceeding storage limit
     - retrieve video of specific time range (for download)
     - log when is the video recorded in database
+    - move server image storage path setting into settings folder

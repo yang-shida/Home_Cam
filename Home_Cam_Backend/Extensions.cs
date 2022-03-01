@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using FFMediaToolkit.Graphics;
 using Home_Cam_Backend.Controllers;
@@ -17,6 +18,7 @@ namespace Home_Cam_Backend
 {
     public static class Extensions
     {
+        private static Mutex mut = new Mutex();
         public static (string gatewayAddress, string subnetMask) getGatewayAddressAndSubnetMask()
         {
             string gatewayAddress="", subnetMask="";
@@ -118,6 +120,7 @@ namespace Home_Cam_Backend
 
         public static void WriteToLogFile(string content, string path="D:/Download/ConsoleOutput.txt")
         {
+            mut.WaitOne();
             using(FileStream ostrm = new(path, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write))
             {
                 using(StreamWriter writer = new StreamWriter (ostrm))
@@ -128,6 +131,7 @@ namespace Home_Cam_Backend
                     Console.SetOut (oldOut);
                 }
             }
+            mut.ReleaseMutex();
         }
 
         public static Image<Bgr24> ToBitmap(this ImageData imageData)

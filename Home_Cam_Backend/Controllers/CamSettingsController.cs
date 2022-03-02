@@ -24,11 +24,11 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{uniqueId}")]
         public async Task<ActionResult<CamSettingDto>> GetCamSettingAsync(string uniqueId, string ipAddr=null, long? camTime=null)
         {
-            Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] GetCamSettingAsync with MAC = {uniqueId}, IP = {ipAddr ?? "Null"} and camTime = {camTime ?? -1}");
             
             // request comes from a camera, add it to ActiveCameras list if is not in the list
             if(ipAddr is not null && camTime is not null)
             {
+                Extensions.WriteToLogFile($"[{DateTime.Now.ToString("MM/dd/yyyy-hh:mm:ss")}] GetCamSettingAsync with MAC = {uniqueId}, IP = {ipAddr ?? "Null"} and camTime = {camTime ?? -1}");
                 if(CamController.ActiveCameras.Find(camInList => camInList.UniqueId==uniqueId) is null)
                 {
                     Esp32Cam tempCam = new Esp32Cam(ipAddr, uniqueId, (long)camTime);
@@ -118,6 +118,12 @@ namespace Home_Cam_Backend.Controllers
             };
 
             await repository.UpdateCamSettingAsync(camSetting);
+
+            int camIndex = CamController.ActiveCameras.FindIndex(cam=>cam.UniqueId==camSettingDto.UniqueId);
+            if(camIndex!=-1)
+            {
+                await CamController.ActiveCameras[camIndex].UpdateAllSettings(camSetting);
+            }
 
             return camSetting.AsDto();
             

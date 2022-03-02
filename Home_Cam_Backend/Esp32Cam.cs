@@ -141,10 +141,15 @@ namespace Home_Cam_Backend
         }
         public static async Task<List<Esp32Cam>> FindCameras(ICamSettingsRepository repository)
         {
+            List<Esp32Cam> cameraList = new();
+
             // find gateway address and subnet mask
             List<string> ipAddrList = await Home_Cam_Backend.Extensions.getListOfSubnetIpAddresses(false);
-
-            List<Esp32Cam> cameraList = new();
+            if(ipAddrList.Count==0)
+            {
+                return await Task.FromResult(cameraList);
+            }
+            
             HttpClient client = new();
             client.Timeout = TimeSpan.FromSeconds(2);
             client.DefaultRequestHeaders.ConnectionClose = true;

@@ -1,6 +1,21 @@
-<p>camera card</p>
-<ul>
-    <li>ID: {{camId}}</li>
-    <li>Location: {{camLocation}}</li>
-</ul>
-<img src={{imageUrl}} alt="xxx">
+ <div id="cam-box-container" 
+    [style.--cam-box-width]="cardWidth+'px'"
+    [style.--cam-box-height]="cardHeight+'px'"
+    [style.--cam-box-cam-info-container-height]="(cardHeight-cardWidth)+'px'"
+>
+    <div id="cam-box-image-container">
+        <img id="cam-box-image" src={{imageUrl}} alt="Camera Preview Image">
+    </div>
+    <div id="cam-box-cam-info-container">
+        <div id="cam-box-cam-info-id">
+            {{camId}}
+        </div>
+        <div id="cam-box-cam-info-loc">
+            {{camLocation}}
+        </div>
+        <div id="cam-box-cam-info-refresh">
+            <button (click)="onRefresh()">Refresh</button>
+        </div>
+    </div>
+    
+</div>

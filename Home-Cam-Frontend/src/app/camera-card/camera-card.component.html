@@ -4,7 +4,7 @@
     [style.--cam-box-cam-info-container-height]="(cardHeight-cardWidth)+'px'"
 >
     <div id="cam-box-image-container">
-        <img id="cam-box-image" src={{imageUrl}} alt="Camera Preview Image">
+        <img id="cam-box-image" src={{imageUrl}} alt="Camera Preview Image" onerror="this.src='../../assets/missing_image.jpg'">
     </div>
     <div id="cam-box-cam-info-container">
         <div id="cam-box-cam-info-id">

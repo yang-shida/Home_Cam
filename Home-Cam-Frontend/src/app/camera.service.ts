@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, Observable, of } from 'rxjs';
+import { catchError, Observable, of, tap } from 'rxjs';
 import { CamSetting } from './objects/CamSetting';
 import { CamBasicInfo } from './objects/CamBasicInfo';
 import { CamTimeInterval } from './objects/CamTimeInterval';
@@ -9,8 +9,6 @@ import { CamTimeInterval } from './objects/CamTimeInterval';
   providedIn: 'root'
 })
 export class CameraService {
-  // private serverIP: string = "localhost";
-  // private serverPort: string = "5001";
   private cameraUrl: string = "api/cam";
   private cameraSettingUrl: string = "api/camSettings";
 
@@ -18,14 +16,29 @@ export class CameraService {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
 
-  constructor(private http: HttpClient) { }
+  private localCamList: CamBasicInfo[] = [];
+  private localCamListRefreshPeriodSec: number = 60;
+  private lastLocalCamListUpdateTime: number;
+
+  constructor(private http: HttpClient) {
+    this.lastLocalCamListUpdateTime = Date.now() - (this.localCamListRefreshPeriodSec * 1000 + 1);
+  }
 
   // camera services
   getActiveCameras(): Observable<CamBasicInfo[]> {
+    if (Date.now() - this.lastLocalCamListUpdateTime < this.localCamListRefreshPeriodSec) {
+      return of(this.localCamList);
+    }
+    // only ask for new list when current list is too old
     const fullUrl = `${this.cameraUrl}?needRescan=false`;
     return this.http.get<CamBasicInfo[]>(fullUrl).pipe(
+      tap(
+        () => {
+          this.lastLocalCamListUpdateTime = Date.now();
+        }
+      ),
       catchError(
-        (err, caught) => {
+        () => {
           let emptyCamBasicInfo: CamBasicInfo = {
             IpAddr: "N/A",
             MacAddr: "N/A"

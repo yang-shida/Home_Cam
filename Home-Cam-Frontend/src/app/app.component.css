@@ -1,0 +1,19 @@
+#app-container{
+    display: grid;
+    grid-template-columns: minmax(200px, 15%) 1px auto;
+    margin: 0;
+    padding: 0;
+}
+
+#side-menu{
+    grid-column: 1 2;
+    overflow: auto;
+}
+
+#main-container{
+    display: flex;
+    margin: 0;
+    grid-column: 2 3;
+    overflow: auto;
+    height: 100vh;
+}

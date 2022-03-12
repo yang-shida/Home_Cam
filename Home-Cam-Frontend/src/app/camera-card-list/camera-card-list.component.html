@@ -1,9 +1,17 @@
-<div id="cam-list-container" *ngIf="camIdList.length>0">
-    <app-camera-card *ngFor="let camId of camIdList" [camId]="camId"></app-camera-card>
-</div>
 <div id="cam-list-page-container">
+    <div id="cam-list-container" *ngIf="camIdList.length>0">
+        <app-camera-card *ngFor="let camId of camIdList" [camId]="camId"></app-camera-card>
+    </div>
+    <button mat-flat-button color="primary" id="floating-refresh-button" (click)="onRefresh()">Discover Cameras</button>
+    <div id="button-footer-spacer"></div>
+
     <div *ngIf="camIdList.length==0" id="no-camera-alert">
         <div id="no-camera-text">No camera available.</div>
-        <button mat-flat-button color="primary" (click)="onRefresh()">Refresh</button>
+        <button mat-flat-button color="primary" (click)="onRefresh()">Discover Cameras</button>
+    </div>
+</div>
+<div id="cover" *ngIf="showRefreshSpinner">
+    <div id="spinner-container">
+        <mat-spinner diameter="200" color="accent"></mat-spinner>
     </div>
 </div>

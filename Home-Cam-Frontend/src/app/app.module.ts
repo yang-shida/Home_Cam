@@ -7,6 +7,8 @@ import {MatListModule} from '@angular/material/list';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+
 
 import { AppComponent } from './app.component';
 import { CameraCardComponent } from './camera-card/camera-card.component';
@@ -30,7 +32,8 @@ import { VideoScreenComponent } from './video-screen/video-screen.component';
     MatListModule,
     MatDividerModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

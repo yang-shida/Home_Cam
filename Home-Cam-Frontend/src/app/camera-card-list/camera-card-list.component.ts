@@ -9,16 +9,32 @@ import { CameraService } from '../camera.service';
 export class CameraCardListComponent implements OnInit {
 
   camIdList: string[] = [];
+  showRefreshSpinner: boolean = false;
 
   constructor(private cameraServices: CameraService) { }
 
   ngOnInit(): void {
-    this.onRefresh();
+    this.cameraServices.getActiveCameras().subscribe(
+      camInfoList => {
+        if(camInfoList.length==1 && camInfoList[0].ipAddr=='N/A'){
+          this.camIdList=[];
+        }
+        else{
+          this.camIdList=camInfoList.map(
+            camInfo=>{
+              return camInfo.uniqueId;
+            }
+          )
+        }
+      }
+    );
   }
 
   onRefresh(): void{
-    this.cameraServices.getActiveCameras().subscribe(
+    this.showRefreshSpinner=true;
+    this.cameraServices.refreshCameraList().subscribe(
       camInfoList => {
+        this.showRefreshSpinner=false;
         if(camInfoList.length==1 && camInfoList[0].ipAddr=='N/A'){
           this.camIdList=[];
         }

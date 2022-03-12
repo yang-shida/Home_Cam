@@ -12,13 +12,15 @@ import { AppComponent } from './app.component';
 import { CameraCardComponent } from './camera-card/camera-card.component';
 import { SideMenuComponent } from './side-menu/side-menu.component';
 import { CameraCardListComponent } from './camera-card-list/camera-card-list.component';
+import { VideoScreenComponent } from './video-screen/video-screen.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CameraCardComponent,
     SideMenuComponent,
-    CameraCardListComponent
+    CameraCardListComponent,
+    VideoScreenComponent
   ],
   imports: [
     BrowserModule,

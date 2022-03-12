@@ -1,4 +1,9 @@
-<div id="cam-list-container">
+<div id="cam-list-container" *ngIf="camIdList.length>0">
     <app-camera-card *ngFor="let camId of camIdList" [camId]="camId"></app-camera-card>
 </div>
-
+<div id="cam-list-page-container">
+    <div *ngIf="camIdList.length==0" id="no-camera-alert">
+        <div id="no-camera-text">No camera available.</div>
+        <button mat-flat-button color="primary" (click)="onRefresh()">Refresh</button>
+    </div>
+</div>

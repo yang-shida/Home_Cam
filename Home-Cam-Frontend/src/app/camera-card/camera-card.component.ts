@@ -24,9 +24,9 @@ export class CameraCardComponent implements OnInit {
     this.cameraServices.getCamSetting(this.camId as string).subscribe(
       camSettings => {
         this.camLocation = camSettings.location;
-        this.imageUrl = this.cameraServices.getCameraPreviewImageUrl(this.camId as string);
       }
     );
+    this.onRefresh();
   }
 
   onRefresh(): void{

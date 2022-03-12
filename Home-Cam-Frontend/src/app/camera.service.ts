@@ -24,6 +24,10 @@ export class CameraService {
     this.lastLocalCamListUpdateTime = Date.now() - (this.localCamListRefreshPeriodSec * 1000 + 1);
   }
 
+  delay(ms: number) {
+      return new Promise( resolve => setTimeout(resolve, ms) );
+  }
+
   // camera services
   getActiveCameras(): Observable<CamBasicInfo[]> {
     if (Date.now() - this.lastLocalCamListUpdateTime < this.localCamListRefreshPeriodSec) {

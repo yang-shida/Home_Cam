@@ -13,13 +13,22 @@ export class CameraCardListComponent implements OnInit {
   constructor(private cameraServices: CameraService) { }
 
   ngOnInit(): void {
+    this.onRefresh();
+  }
+
+  onRefresh(): void{
     this.cameraServices.getActiveCameras().subscribe(
       camInfoList => {
-        this.camIdList=camInfoList.map(
-          camInfo=>{
-            return camInfo.uniqueId;
-          }
-        )
+        if(camInfoList.length==1 && camInfoList[0].ipAddr=='N/A'){
+          this.camIdList=[];
+        }
+        else{
+          this.camIdList=camInfoList.map(
+            camInfo=>{
+              return camInfo.uniqueId;
+            }
+          )
+        }
       }
     );
   }

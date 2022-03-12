@@ -155,10 +155,10 @@ namespace Home_Cam_Backend.BackgroundTasks
                                 }
                         }
                     }
-                    catch (Exception e)
+                    catch
                     {
-                        Console.WriteLine(CamController.ActiveCameras[i].UniqueId);
-                        Console.WriteLine(e.ToString());
+                        // Console.WriteLine(CamController.ActiveCameras[i].UniqueId);
+                        // Console.WriteLine(e.ToString());
                     }
 
                 }

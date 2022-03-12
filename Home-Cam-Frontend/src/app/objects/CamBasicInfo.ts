@@ -1,4 +1,4 @@
 export interface CamBasicInfo{
-    IpAddr: string;
-    MacAddr: string;
+    ipAddr: string;
+    uniqueId: string;
 }

@@ -1,0 +1,18 @@
+<mat-selection-list [multiple]="false">
+    <div *ngFor="let menuItem of menuItems">
+        <mat-list-option [value]="menuItem" (click)="onClickMenuItem(menuItem)" [selected]="menuItem===selectedMenuItem">
+            <div *ngIf="menuItem!=='Cameras'">
+                {{menuItem}}
+            </div>
+            <div id="cameras-option-container" *ngIf="menuItem==='Cameras'">
+                {{menuItem}}
+                <mat-icon *ngIf="!showingCamIdList">chevron_right</mat-icon>
+                <mat-icon *ngIf="showingCamIdList">expand_more</mat-icon>
+            </div>
+        </mat-list-option>
+        <mat-selection-list id="camIdList" *ngIf="menuItem==='Cameras' && showingCamIdList" [multiple]="false">
+            <mat-list-option *ngFor="let cam of camIdList" [value]="cam" (click)="onClickCamId(cam)" [selected]="cam===selectedCamId"> - {{cam}}</mat-list-option>
+        </mat-selection-list>
+        <mat-divider></mat-divider>
+    </div>
+</mat-selection-list>

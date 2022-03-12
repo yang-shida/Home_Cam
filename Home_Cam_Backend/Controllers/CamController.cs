@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace Home_Cam_Backend.Controllers
         {
             this.repository = repo;
             this.capturedImagesRepository = capturedImagesRepository;
-            this.configuration=configuration;
+            this.configuration = configuration;
         }
 
         [HttpGet]
@@ -47,7 +48,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{camId}")]
         public async Task Streaming(string camId, long? startTimeUtc = null)
         {
-            
+
 
             Response.StatusCode = 206;
             Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
@@ -92,14 +93,14 @@ namespace Home_Cam_Backend.Controllers
                     await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
                     await Response.Body.FlushAsync();
 
-                   
+
                 }
                 else
                 {
                     long currTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                     // Console.WriteLine($"FPS: {1000/((double)(currTime-lastTime))}");
-                    currentTimeUtc += (currTime-lastTime);
-                    lastTime=currTime;
+                    currentTimeUtc += (currTime - lastTime);
+                    lastTime = currTime;
                     // fetch next image info from DB
                     // get -5 seconds
                     DateTimeOffset begin = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc - 5 * 1000);
@@ -128,8 +129,8 @@ namespace Home_Cam_Backend.Controllers
                     await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
                     await Response.Body.FlushAsync();
 
-                    
-                    
+
+
                 }
 
                 await delay;
@@ -167,7 +168,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{camId}/available_recording_time_intervals")]
         public async Task<ActionResult<List<TimeIntervalDto>>> GetAvailableRecordingTimeIntervals(string camId, long startTimeUtc, long timeLengthMillis)
         {
-            long thresholdMillis = configuration.GetSection("CamControllerSettings").GetValue<long>("DistinctVideosThresholdSeconds")*1000;
+            long thresholdMillis = configuration.GetSection("CamControllerSettings").GetValue<long>("DistinctVideosThresholdSeconds") * 1000;
             List<TimeIntervalDto> timeIntervals = await capturedImagesRepository.GetRecordedTimeIntervals(camId, startTimeUtc, timeLengthMillis, thresholdMillis);
             return timeIntervals;
         }

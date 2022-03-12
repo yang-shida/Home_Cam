@@ -11,12 +11,14 @@ import {MatButtonModule} from '@angular/material/button';
 import { AppComponent } from './app.component';
 import { CameraCardComponent } from './camera-card/camera-card.component';
 import { SideMenuComponent } from './side-menu/side-menu.component';
+import { CameraCardListComponent } from './camera-card-list/camera-card-list.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CameraCardComponent,
-    SideMenuComponent
+    SideMenuComponent,
+    CameraCardListComponent
   ],
   imports: [
     BrowserModule,

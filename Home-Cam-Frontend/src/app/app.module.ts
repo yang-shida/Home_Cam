@@ -25,7 +25,7 @@ const appRoutes: Routes = [
   {path: 'card-view', component: CameraCardListComponent},
   {path: '', redirectTo: '/card-view', pathMatch: 'full'},
   {path: 'cctv-view', component: CctvViewComponent},
-  {path: 'cam-detail', component: CamDetailComponent},
+  {path: 'cam-detail', component: CamDetailComponent, children: [{path: ':camId', component: CamDetailComponent}]},
   {path: 'setting', component: GeneralSettingComponent}
 ]
 

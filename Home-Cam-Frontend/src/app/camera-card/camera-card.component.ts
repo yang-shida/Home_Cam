@@ -15,8 +15,8 @@ export class CameraCardComponent implements OnInit {
 
   @Input() camId: string = "N/A";
 
-  camLocation?: string;
-  imageUrl?: string;
+  camLocation: string = "N/A";
+  imageUrl: string = "N/A";
 
   constructor(private cameraServices: CameraService) { }
 

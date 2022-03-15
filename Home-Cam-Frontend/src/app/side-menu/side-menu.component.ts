@@ -16,8 +16,8 @@ export class SideMenuComponent implements OnInit {
   menuItems: string[] = ["Camera Cards", "CCTV Style", "Cameras", "Settings"];
   camIdList: string[] = []
   showingCamIdList: boolean = false;
-  selectedMenuItem?: string;
-  selectedCamId?: string;
+  selectedMenuItem: string = "N/A";
+  selectedCamId: string = "N/A";
 
   private localCamListSubscription: Subscription;
   private selectedMenuItemSubscription: Subscription;
@@ -28,7 +28,6 @@ export class SideMenuComponent implements OnInit {
     private router: Router,
     private location: Location
   ) {
-    this.selectBasedOnUrl(this.location.path());
     this.localCamListSubscription = this.cameraServices.onLocalCamListUpdate().subscribe(
       camList => {
         this.camIdList = camList.map(
@@ -49,6 +48,9 @@ export class SideMenuComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.selectBasedOnUrl(this.location.path());
+    this.sideBarSelectionServices.selectMenuItem(this.selectedMenuItem);
+    this.sideBarSelectionServices.selectCamera(this.selectedCamId);
   }
 
   toggleShowCamIdList(): void {
@@ -90,20 +92,26 @@ export class SideMenuComponent implements OnInit {
   selectBasedOnUrl(url: string): void {
     switch (url) {
       case "/card-view":
-        this.selectedMenuItem = "Camera Cards";
+        this.sideBarSelectionServices.selectMenuItem("Camera Cards");
         break;
       case "/cctv-view":
-        this.selectedMenuItem = "CCTV Style";
+        this.sideBarSelectionServices.selectMenuItem("CCTV Style");
         break;
       case "/setting":
-        this.selectedMenuItem = "Settings";
-        break;
-      case "/cam-detail":
-        this.selectedMenuItem = "Cameras";
+        this.sideBarSelectionServices.selectMenuItem("Settings");
         break;
       default:
-        console.log("selectBasedOnUrl: Unknown URL: "+url)
-        this.selectedMenuItem = this.menuItems[0];
+        if (url.includes('/cam-detail')) {
+          this.sideBarSelectionServices.selectMenuItem("Cameras");
+          this.showingCamIdList = true;
+          let res: RegExpMatchArray|null = url.match(/([a-f0-9]{2}:){5}[a-f0-9]{2}/g);
+          let camIdFromUrl: string = res==null?"N/A":res[0];
+          this.sideBarSelectionServices.selectCamera(camIdFromUrl);
+        }
+        else {
+          console.log("selectBasedOnUrl: Unknown URL: " + url)
+          this.selectedMenuItem = this.menuItems[0];
+        }
         break;
     }
   }

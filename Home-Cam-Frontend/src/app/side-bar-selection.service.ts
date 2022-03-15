@@ -6,8 +6,8 @@ import { Observable, Subject } from 'rxjs';
 })
 export class SideBarSelectionService {
 
-  selectedMenuItem: string = "";
-  selectedCam?: string;
+  selectedMenuItem: string = "N/A";
+  selectedCam: string = "N/A";
 
   selectedMenuItemSubject: Subject<string>=new Subject<string>();
   selectedCamSubject: Subject<string>=new Subject<string>();

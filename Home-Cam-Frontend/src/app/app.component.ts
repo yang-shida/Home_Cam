@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CameraService } from './camera.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'Home-Cam-Frontend';
+  constructor (private cameraServices: CameraService){
+    this.cameraServices.getActiveCameras().subscribe();
+  }
 }

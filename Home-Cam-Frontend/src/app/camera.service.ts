@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, Observable, of, tap, map } from 'rxjs';
+import { catchError, Observable, of, Subject, tap } from 'rxjs';
 import { CamSetting } from './objects/CamSetting';
 import { CamBasicInfo } from './objects/CamBasicInfo';
 import { CamTimeInterval } from './objects/CamTimeInterval';
@@ -20,6 +20,8 @@ export class CameraService {
   private localCamListRefreshPeriodSec: number = 60;
   private lastLocalCamListUpdateTime: number;
 
+  private localCamListSubject: Subject<CamBasicInfo[]> = new Subject<CamBasicInfo[]>();
+
   constructor(private http: HttpClient) {
     this.lastLocalCamListUpdateTime = Date.now() - (this.localCamListRefreshPeriodSec * 1000 + 1);
   }
@@ -29,6 +31,10 @@ export class CameraService {
   }
 
   // camera services
+  onLocalCamListUpdate(): Observable<CamBasicInfo[]>{
+    return this.localCamListSubject.asObservable();
+  }
+
   getActiveCameras(): Observable<CamBasicInfo[]> {
     if (Date.now() - this.lastLocalCamListUpdateTime < this.localCamListRefreshPeriodSec) {
       return of(this.localCamList);
@@ -37,8 +43,10 @@ export class CameraService {
     const fullUrl = `${this.cameraUrl}?needRescan=false`;
     return this.http.get<any[]>(fullUrl).pipe(
       tap(
-        () => {
+        (camInfoList) => {
           this.lastLocalCamListUpdateTime = Date.now();
+          this.localCamList=camInfoList;
+          this.localCamListSubject.next(camInfoList);
         }
       ),
       catchError(
@@ -56,6 +64,13 @@ export class CameraService {
   refreshCameraList(): Observable<CamBasicInfo[]> {
     const fullUrl = `${this.cameraUrl}?needRescan=true`;
     return this.http.get<CamBasicInfo[]>(fullUrl).pipe(
+      tap(
+        camInfoList => {
+          this.lastLocalCamListUpdateTime = Date.now();
+          this.localCamList=camInfoList;
+          this.localCamListSubject.next(camInfoList);
+        }
+      ),
       catchError(
         () => {
           let emptyCamBasicInfo: CamBasicInfo = {

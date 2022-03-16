@@ -22,7 +22,6 @@ export class CamDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.camId=this.sideBarSelectionServices.getSelectedCam();
   }
 
 }

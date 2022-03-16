@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +9,8 @@ export class SideBarSelectionService {
   selectedMenuItem: string = "N/A";
   selectedCam: string = "N/A";
 
-  selectedMenuItemSubject: Subject<string>=new Subject<string>();
-  selectedCamSubject: Subject<string>=new Subject<string>();
+  selectedMenuItemSubject: BehaviorSubject<string>=new BehaviorSubject<string>("N/A");
+  selectedCamSubject: BehaviorSubject<string>=new BehaviorSubject<string>("N/A");
 
   constructor() { }
 
@@ -30,14 +30,6 @@ export class SideBarSelectionService {
 
   onSelectedCamUpdate(): Observable<string>{
     return this.selectedCamSubject.asObservable();
-  }
-
-  getSelectedMenuItem(): string{
-    return this.selectedMenuItem;
-  }
-
-  getSelectedCam(): string{
-    return this.selectedCam==null?"N/A":this.selectedCam;
   }
 
 }

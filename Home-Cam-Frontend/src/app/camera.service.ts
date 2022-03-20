@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, Observable, of, Subject, tap } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, of, Subject, tap } from 'rxjs';
 import { CamSetting } from './objects/CamSetting';
 import { CamBasicInfo } from './objects/CamBasicInfo';
 import { CamTimeInterval } from './objects/CamTimeInterval';
@@ -20,7 +20,7 @@ export class CameraService {
   private localCamListRefreshPeriodSec: number = 60;
   private lastLocalCamListUpdateTime: number;
 
-  private localCamListSubject: Subject<CamBasicInfo[]> = new Subject<CamBasicInfo[]>();
+  private localCamListSubject: BehaviorSubject<CamBasicInfo[]> = new BehaviorSubject<CamBasicInfo[]>(this.localCamList);
 
   constructor(private http: HttpClient) {
     this.lastLocalCamListUpdateTime = Date.now() - (this.localCamListRefreshPeriodSec * 1000 + 1);

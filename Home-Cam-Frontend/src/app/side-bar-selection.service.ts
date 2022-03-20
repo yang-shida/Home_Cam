@@ -9,8 +9,8 @@ export class SideBarSelectionService {
   selectedMenuItem: string = "N/A";
   selectedCam: string = "N/A";
 
-  selectedMenuItemSubject: BehaviorSubject<string>=new BehaviorSubject<string>("N/A");
-  selectedCamSubject: BehaviorSubject<string>=new BehaviorSubject<string>("N/A");
+  selectedMenuItemSubject: BehaviorSubject<string>=new BehaviorSubject<string>(this.selectedMenuItem);
+  selectedCamSubject: BehaviorSubject<string>=new BehaviorSubject<string>(this.selectedCam);
 
   constructor() { }
 

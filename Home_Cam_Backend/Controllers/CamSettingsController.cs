@@ -56,7 +56,7 @@ namespace Home_Cam_Backend.Controllers
                     {
                         UniqueId = uniqueId,
                         Location = "Default Location",
-                        FrameSize = 6,
+                        FrameSize = 10,
                         FlashLightOn = false,
                         HorizontalMirror = false,
                         VerticalMirror = false

@@ -205,7 +205,7 @@ namespace Home_Cam_Backend
                                     {
                                         UniqueId = cam.UniqueId,
                                         Location = "Default Location",
-                                        FrameSize = 6,
+                                        FrameSize = 10,
                                         FlashLightOn = false,
                                         HorizontalMirror = false,
                                         VerticalMirror = false

@@ -34,7 +34,7 @@ namespace Home_Cam_Backend
                 IHost host = CreateHostBuilder(args).Build();
                 host.RunAsync(cancellationToken);
                 shutdownTask = host.WaitForShutdownAsync(cancellationToken);
-                while(!shutdownTask.IsCompleted);
+                shutdownTask.Wait();
             }while(isRestart);
             
         }

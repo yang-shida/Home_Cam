@@ -1,0 +1,36 @@
+#video-screen-list{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#video-screen-container {
+    width: var(--video_screen_width);
+    padding: 2px;
+    text-align: center;
+}
+
+#item-per-row-selection{
+    width: fit-content;
+    height: fit-content;
+
+    border-radius: 25px;
+
+    display: flex;
+    overflow: hidden;
+
+    position: fixed;
+    top: 95vh;
+    left: 50%;
+    transform: translate(-50%, -100%);
+}
+
+#item-per-row-selection > button{
+    border-radius: 0%;
+    height: 50px;
+    background-color: blueviolet;
+    color: white;
+}
+
+#floating-botton-spacer{
+    height: 13vh;
+}

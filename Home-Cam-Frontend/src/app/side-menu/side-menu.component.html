@@ -1,6 +1,6 @@
 <mat-selection-list [multiple]="false">
     <div *ngFor="let menuItem of menuItems">
-        <mat-list-option [value]="menuItem" (click)="onClickMenuItem(menuItem)" [selected]="menuItem===selectedMenuItem">
+        <mat-list-option [value]="menuItem" (click)="onClickMenuItem(menuItem)" [selected]="menuItem===selectedMenuItem" [routerLink]="menuItemToUrl(menuItem)">
             <div *ngIf="menuItem!=='Cameras'">
                 {{menuItem}}
             </div>
@@ -11,7 +11,7 @@
             </div>
         </mat-list-option>
         <mat-selection-list id="camIdList" *ngIf="menuItem==='Cameras' && showingCamIdList" [multiple]="false">
-            <mat-list-option *ngFor="let cam of camIdList" [value]="cam" (click)="onClickCamId(cam)" [selected]="cam===selectedCamId"> - {{cam}}</mat-list-option>
+            <mat-list-option *ngFor="let cam of camIdList" [value]="cam" (click)="onClickCamId(cam)" [selected]="cam===selectedCamId" [routerLink]="'/cam-detail/'+cam"> - {{cam}}</mat-list-option>
         </mat-selection-list>
         <mat-divider></mat-divider>
     </div>

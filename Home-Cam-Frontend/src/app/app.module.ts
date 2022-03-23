@@ -10,6 +10,8 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { RouterModule, Routes } from '@angular/router';
+import {MatMenuModule} from '@angular/material/menu';
+import {MatSelectModule} from '@angular/material/select';
 
 
 import { AppComponent } from './app.component';
@@ -52,7 +54,9 @@ const appRoutes: Routes = [
     MatButtonModule,
     MatProgressSpinnerModule,
     DragDropModule,
-    RouterModule.forRoot(appRoutes)
+    MatMenuModule,
+    MatSelectModule,
+    RouterModule.forRoot(appRoutes),
   ],
   providers: [],
   bootstrap: [AppComponent]

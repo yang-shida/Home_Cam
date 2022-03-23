@@ -12,6 +12,8 @@ export class VideoScreenComponent implements OnInit {
   @Input() camId: string = "N/A";
   @Input() startTime: number = -1;
 
+  isPlaying: boolean = true;
+
   constructor(private cameraServices: CameraService) { }
 
   ngOnInit(): void {

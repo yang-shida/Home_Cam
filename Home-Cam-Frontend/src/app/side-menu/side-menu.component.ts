@@ -25,7 +25,6 @@ export class SideMenuComponent implements OnInit {
 
   constructor(private cameraServices: CameraService,
     private sideBarSelectionServices: SideBarSelectionService,
-    private router: Router,
     private location: Location
   ) {
     this.localCamListSubscription = this.cameraServices.onLocalCamListUpdate().subscribe(
@@ -83,7 +82,7 @@ export class SideMenuComponent implements OnInit {
       case "Settings":
         return "setting";
       case "Cameras":
-        return this.selectedCamId == null ? this.location.path() : 'cam-detail';
+        return this.selectedCamId == 'N/A' ? this.location.path() : 'cam-detail';
       default:
         return this.location.path();
     }

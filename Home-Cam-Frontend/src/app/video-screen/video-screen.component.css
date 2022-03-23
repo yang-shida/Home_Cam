@@ -1,7 +1,4 @@
 img{
-    width: 300px;
-    height: 300px;
-
-    border-style: solid;
-    margin-bottom: 20px;
+    width: 100%;
+    height: auto;
 }

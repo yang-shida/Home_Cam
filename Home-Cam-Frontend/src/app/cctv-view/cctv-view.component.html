@@ -1,1 +1,10 @@
-<p>cctv-view works!</p>
+<div id="video-screen-list" [style.--video_screen_width]="(100/videoScreensPerRow)+'%'">
+    <div id="video-screen-container" *ngFor="let camId of camIdList">
+        <app-video-screen [camId]="camId"></app-video-screen>
+        {{camId}}
+    </div>
+</div>
+<div id="item-per-row-selection">
+    <button mat-flat-button *ngFor="let num of [1,2,3,4]" [ngStyle]="{'background-color': videoScreensPerRow==num?'blueviolet':'skyblue'}" (click)="onSelectItemsPerRow(num)">{{num}}</button>
+</div>
+<div id="floating-botton-spacer"></div>

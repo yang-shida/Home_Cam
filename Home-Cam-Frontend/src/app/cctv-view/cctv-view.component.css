@@ -1,4 +1,4 @@
-#video-screen-list{
+#video-screen-list {
     display: flex;
     flex-wrap: wrap;
 }
@@ -9,7 +9,7 @@
     text-align: center;
 }
 
-#item-per-row-selection{
+#item-per-row-selection {
     width: fit-content;
     height: fit-content;
 
@@ -24,13 +24,13 @@
     transform: translate(-50%, -100%);
 }
 
-#item-per-row-selection > button{
+#item-per-row-selection>button {
     border-radius: 0%;
     height: 50px;
     background-color: blueviolet;
     color: white;
 }
 
-#floating-botton-spacer{
+#floating-botton-spacer {
     height: 13vh;
 }

@@ -2,7 +2,7 @@ namespace Home_Cam_Backend.Dtos
 {
     public record AuthDto
     {
-        public string currPwd { get; init; }
-        public string newPwd { get; init; }
+        public string CurrPwd { get; init; }
+        public string NewPwd { get; init; }
     }
 }

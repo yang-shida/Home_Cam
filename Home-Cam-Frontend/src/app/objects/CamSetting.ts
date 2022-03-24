@@ -1,8 +1,8 @@
 export interface CamSetting{
-    uniqueId: string;
-    location: string;
-    frameSize: number;
-    flashLightOn: boolean;
-    horizontalMirror: boolean;
-    verticalMirror: boolean;
+    UniqueId: string;
+    Location: string;
+    FrameSize: number;
+    FlashLightOn: boolean;
+    HorizontalMirror: boolean;
+    VerticalMirror: boolean;
 }

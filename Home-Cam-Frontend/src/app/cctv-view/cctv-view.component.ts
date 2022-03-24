@@ -20,7 +20,7 @@ export class CctvViewComponent implements OnInit {
       camList=>{
         this.camIdList=camList.map(
           camInfo=>{
-            return camInfo.uniqueId;
+            return camInfo.UniqueId;
           }
         )
       }

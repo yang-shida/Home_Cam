@@ -12,6 +12,10 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { RouterModule, Routes } from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSelectModule} from '@angular/material/select';
+import {MatInputModule} from '@angular/material/input';
+import { ReactiveFormsModule } from '@angular/forms';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
+
 
 
 import { AppComponent } from './app.component';
@@ -28,7 +32,7 @@ const appRoutes: Routes = [
   {path: '', redirectTo: '/card-view', pathMatch: 'full'},
   {path: 'cctv-view', component: CctvViewComponent},
   {path: 'cam-detail', component: CamDetailComponent, children: [{path: ':camId', component: CamDetailComponent}]},
-  {path: 'setting', component: GeneralSettingComponent}
+  {path: 'backend-control', component: GeneralSettingComponent}
 ]
 
 
@@ -56,7 +60,10 @@ const appRoutes: Routes = [
     DragDropModule,
     MatMenuModule,
     MatSelectModule,
+    MatInputModule,
     RouterModule.forRoot(appRoutes),
+    ReactiveFormsModule,
+    MatSnackBarModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

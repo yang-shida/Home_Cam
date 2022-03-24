@@ -52,8 +52,8 @@ export class CameraService {
       catchError(
         () => {
           let emptyCamBasicInfo: CamBasicInfo = {
-            ipAddr: "N/A",
-            uniqueId: "N/A"
+            IpAddr: "N/A",
+            UniqueId: "N/A"
           }
           return of([emptyCamBasicInfo]);
         }
@@ -74,8 +74,8 @@ export class CameraService {
       catchError(
         () => {
           let emptyCamBasicInfo: CamBasicInfo = {
-            ipAddr: "N/A",
-            uniqueId: "N/A"
+            IpAddr: "N/A",
+            UniqueId: "N/A"
           }
           return of([emptyCamBasicInfo]);
         }
@@ -101,8 +101,8 @@ export class CameraService {
       catchError(
         (err, caught) => {
           let emptyCamTimeInterval: CamTimeInterval = {
-            start: 0,
-            end: 0
+            Start: 0,
+            End: 0
           };
           return of([emptyCamTimeInterval]);
         }
@@ -117,12 +117,12 @@ export class CameraService {
       catchError(
         (err, caught) => {
           let emptyCamSetting: CamSetting = {
-            uniqueId: "N/A",
-            location: "N/A",
-            frameSize: -1,
-            flashLightOn: false,
-            horizontalMirror: false,
-            verticalMirror: false
+            UniqueId: "N/A",
+            Location: "N/A",
+            FrameSize: -1,
+            FlashLightOn: false,
+            HorizontalMirror: false,
+            VerticalMirror: false
           };
           return of(emptyCamSetting);
         }
@@ -136,12 +136,12 @@ export class CameraService {
       catchError(
         (err, caught) => {
           let emptyCamSetting: CamSetting = {
-            uniqueId: "N/A",
-            location: "N/A",
-            frameSize: -1,
-            flashLightOn: false,
-            horizontalMirror: false,
-            verticalMirror: false
+            UniqueId: "N/A",
+            Location: "N/A",
+            FrameSize: -1,
+            FlashLightOn: false,
+            HorizontalMirror: false,
+            VerticalMirror: false
           };
           return of(emptyCamSetting);
         }

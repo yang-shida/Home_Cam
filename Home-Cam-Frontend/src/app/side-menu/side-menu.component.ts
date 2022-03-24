@@ -13,7 +13,7 @@ import { Location } from '@angular/common';
 })
 export class SideMenuComponent implements OnInit {
 
-  menuItems: string[] = ["Camera Cards", "CCTV Style", "Cameras", "Settings"];
+  menuItems: string[] = ["Camera Cards", "CCTV Style", "Cameras", "Backend Control"];
   camIdList: string[] = []
   showingCamIdList: boolean = false;
   selectedMenuItem: string = "N/A";
@@ -30,7 +30,7 @@ export class SideMenuComponent implements OnInit {
     this.localCamListSubscription = this.cameraServices.onLocalCamListUpdate().subscribe(
       camList => {
         this.camIdList = camList.map(
-          value => value.uniqueId
+          value => value.UniqueId
         )
       }
     );
@@ -79,8 +79,8 @@ export class SideMenuComponent implements OnInit {
         return "card-view";
       case "CCTV Style":
         return "cctv-view";
-      case "Settings":
-        return "setting";
+      case "Backend Control":
+        return "backend-control";
       case "Cameras":
         return this.selectedCamId == 'N/A' ? this.location.path() : 'cam-detail';
       default:
@@ -96,8 +96,8 @@ export class SideMenuComponent implements OnInit {
       case "/cctv-view":
         this.sideBarSelectionServices.selectMenuItem("CCTV Style");
         break;
-      case "/setting":
-        this.sideBarSelectionServices.selectMenuItem("Settings");
+      case "/backend-control":
+        this.sideBarSelectionServices.selectMenuItem("Backend Control");
         break;
       default:
         if (url.includes('/cam-detail')) {

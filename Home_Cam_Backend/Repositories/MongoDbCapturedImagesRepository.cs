@@ -121,7 +121,7 @@ namespace Home_Cam_Backend.Repositories
                             };
             var pipeline = new[] { match, sort, limit, project };
             var doc = await (await capturedImageInfoCollection.AggregateAsync<ImageInfoCreatedDateDto>(pipeline)).SingleOrDefaultAsync();
-            return doc.CreatedDate;
+            return doc!=null?doc.CreatedDate:DateTimeOffset.MinValue;
         }
 
         public async Task<List<TimeIntervalDto>> GetRecordedTimeIntervals(string camId, long startTimeUtc, long timeLengthMillis, long thresholdMillis)

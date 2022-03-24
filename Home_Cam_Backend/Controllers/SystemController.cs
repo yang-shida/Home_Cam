@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Home_Cam_Backend.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 
@@ -16,6 +17,26 @@ namespace Home_Cam_Backend.Controllers
     {
         private readonly IConfiguration configuration;
 
+        private bool CheckPwd(string pwd)
+        {
+            using (SHA256 mySHA256 = SHA256.Create())
+            {
+                byte[] encodedPwd = Encoding.UTF8.GetBytes(pwd);
+                byte[] hashedPwd = mySHA256.ComputeHash(encodedPwd);
+                string storedPwd = configuration.GetSection("Authentication").GetValue<string>("ServerHashedPwd");
+                byte[] storedHashedPwd = Extensions.hexStrToByteArray(storedPwd);
+
+                if (hashedPwd.SequenceEqual(storedHashedPwd))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         public SystemController(IConfiguration configuration)
         {
             this.configuration = configuration;
@@ -24,22 +45,29 @@ namespace Home_Cam_Backend.Controllers
         [HttpPost("restart")]
         public ActionResult<string> restart(AuthDto authInfo)
         {
-            using (SHA256 mySHA256 = SHA256.Create())
+            bool pwdIsRight = CheckPwd(authInfo.CurrPwd);
+            if (pwdIsRight)
             {
-                byte[] encodedPwd = Encoding.UTF8.GetBytes(authInfo.currPwd);
-                byte[] hashedPwd = mySHA256.ComputeHash(encodedPwd);
-                string storedPwd = configuration.GetSection("Authentication").GetValue<string>("ServerHashedPwd");
-                byte[] storedHashedPwd = Extensions.hexStrToByteArray(storedPwd);
+                Program.Restart();
+                return Ok("Server program restarted.");
+            }
+            else
+            {
+                return BadRequest("Incorrect password!");
+            }
+        }
 
-                if (hashedPwd.SequenceEqual(storedHashedPwd))
-                {
-                    Program.Restart();
-                    return Ok("Server program restarted.");
-                }
-                else
-                {
-                    return BadRequest("Incorrect password!");
-                }
+        [HttpPost("check-pwd")]
+        public ActionResult<string> CheckPwd(AuthDto authInfo)
+        {
+            bool pwdIsRight = CheckPwd(authInfo.CurrPwd);
+            if (pwdIsRight)
+            {
+                return Ok("Server program restarted.");
+            }
+            else
+            {
+                return BadRequest("Incorrect password!");
             }
         }
 

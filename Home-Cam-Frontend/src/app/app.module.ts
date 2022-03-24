@@ -13,9 +13,9 @@ import { RouterModule, Routes } from '@angular/router';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSelectModule} from '@angular/material/select';
 import {MatInputModule} from '@angular/material/input';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule,FormsModule  } from '@angular/forms';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
-
+import {MatDialogModule} from '@angular/material/dialog';
 
 
 import { AppComponent } from './app.component';
@@ -26,6 +26,8 @@ import { VideoScreenComponent } from './video-screen/video-screen.component';
 import { CctvViewComponent } from './cctv-view/cctv-view.component';
 import { CamDetailComponent } from './cam-detail/cam-detail.component';
 import { GeneralSettingComponent } from './general-setting/general-setting.component';
+import { EnterPwdDialogComponent } from './enter-pwd-dialog/enter-pwd-dialog.component';
+import { AskForRebootDialogComponent } from './ask-for-reboot-dialog/ask-for-reboot-dialog.component';
 
 const appRoutes: Routes = [
   {path: 'card-view', component: CameraCardListComponent},
@@ -45,7 +47,9 @@ const appRoutes: Routes = [
     VideoScreenComponent,
     CctvViewComponent,
     CamDetailComponent,
-    GeneralSettingComponent
+    GeneralSettingComponent,
+    EnterPwdDialogComponent,
+    AskForRebootDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -63,7 +67,9 @@ const appRoutes: Routes = [
     MatInputModule,
     RouterModule.forRoot(appRoutes),
     ReactiveFormsModule,
+    FormsModule,
     MatSnackBarModule,
+    MatDialogModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

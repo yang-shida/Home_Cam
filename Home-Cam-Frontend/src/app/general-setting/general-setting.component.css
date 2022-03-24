@@ -32,6 +32,13 @@ h1{
     width: fit-content;
 }
 
+.form-buttons {
+    display: flex;
+    align-items: center;
+    column-gap: 2vh;
+}
+
+
 .form-validation-warning{
     margin-top: 0;
     margin-bottom: 1em;

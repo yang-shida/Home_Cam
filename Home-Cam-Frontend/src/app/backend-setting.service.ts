@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { AuthInfo } from './objects/AuthInfo';
 import { SystemSetting } from './objects/SystemSetting';
 
@@ -61,9 +61,7 @@ export class BackendSettingService {
     return this.http.put(fullUrl, newSetting, {responseType: 'text'}).pipe(
       tap(
         res => {
-          console.log("tap ", res)
           this.systemSetting = newSetting;
-          return newSetting;
         }
       ),
       catchError(
@@ -87,19 +85,38 @@ export class BackendSettingService {
       NewPwd: ""
     };
     return this.http.post(fullUrl, authInfo, {responseType: 'text'}).pipe(
-      tap(
+      map(
         (res) => {
-          console.log(res);
-          return of(true);
+          return true;
         }
       ),
       catchError(
         (err) => {
-          console.log(err.error)
           return of(false)
         }
       )
     ) as Observable<boolean>
   }
+
+  checkPwd(pwd: string): Observable<boolean> {
+    let fullUrl = `${this.settingUrl}/check-pwd`;
+    let authInfo: AuthInfo = {
+      CurrPwd: pwd,
+      NewPwd: ""
+    };
+    return this.http.post(fullUrl, authInfo, {responseType: 'text'}).pipe(
+      map(
+        (res) => {
+          return true;
+        }
+      ),
+      catchError(
+        (err) => {
+          return of(false)
+        }
+      )
+    ) as Observable<boolean>
+  }
+  
 
 }

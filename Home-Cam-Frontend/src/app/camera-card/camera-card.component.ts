@@ -23,7 +23,7 @@ export class CameraCardComponent implements OnInit {
   ngOnInit(): void {
     this.cameraServices.getCamSetting(this.camId as string).subscribe(
       camSettings => {
-        this.camLocation = camSettings.location;
+        this.camLocation = camSettings.Location;
       }
     );
     this.onRefresh();

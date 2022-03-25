@@ -1,4 +1,4 @@
 export interface CamTimeInterval{
-    start: number;
-    end: number;
+    Start: number;
+    End: number;
 }

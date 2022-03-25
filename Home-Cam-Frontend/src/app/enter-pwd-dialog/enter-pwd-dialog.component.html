@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Backend password</h1>
+<div mat-dialog-content>
+  <p>Type password below to continue: </p>
+  <mat-form-field appearance="fill">
+    <mat-label>Password</mat-label>
+    <input matInput [(ngModel)]="pwd" type="password" required>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="undefined">No Thanks</button>
+  <button mat-button [mat-dialog-close]="pwd" [disabled]="pwd==''">Ok</button>
+</div>

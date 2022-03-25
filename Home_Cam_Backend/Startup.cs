@@ -21,6 +21,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using Newtonsoft.Json.Serialization;
 
 namespace Home_Cam_Backend
 {
@@ -36,7 +37,6 @@ namespace Home_Cam_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
 
             services.AddHostedService<ImageCaptureBackgroundTask>();
             services.AddHostedService<SearchCamBackgroundTask>();
@@ -51,11 +51,16 @@ namespace Home_Cam_Backend
                 return new MongoClient(settings.ConnectionString);
             });
 
-            services.AddControllers();
+            services.AddControllers().AddJsonOptions(jsonOptions =>
+            {
+                jsonOptions.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Home_Cam_Backend", Version = "v1" });
             });
+
+            Extensions.Init(Configuration);
 
 
         }

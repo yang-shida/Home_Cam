@@ -1,1 +1,87 @@
-<p>general-setting works!</p>
+<div class="page-container">
+    <h1>Backend Control</h1>
+    <div class="section-box">
+        <h2>Backend Settings <button mat-flat-button color="primary"
+                (click)="toggleSettingForm()">{{settingFormIsOpen?'Close':'Open'}}</button></h2>
+        <form *ngIf="settingFormIsOpen" class="setting-form" [formGroup]="updateSettingForm"
+            (ngSubmit)="onUpdateSetting()">
+            <mat-form-field appearance="fill">
+                <mat-label for="max-space">Max storage space (GBs) [int, 1-50]</mat-label>
+                <input matInput type="text" formControlName="MaxSpaceGBs">
+            </mat-form-field>
+            <div class="form-validation-warning" *ngIf="updateSettingForm.get('MaxSpaceGBs')?.errors?.['required']">
+                This field is required.
+            </div>
+            <div class="form-validation-warning" 
+                *ngIf="updateSettingForm.get('MaxSpaceGBs')?.errors?.['pattern'] ||
+                updateSettingForm.get('MaxSpaceGBs')?.errors?.['min'] ||
+                updateSettingForm.get('MaxSpaceGBs')?.errors?.['max']"
+            >
+                Max storage space should be an integer between 1 and 50.
+            </div>
+
+            <mat-form-field appearance="fill">
+                <mat-label for="percent-to-delete-when-full">Percent to delete when full [int, 5-90]</mat-label>
+                <input matInput type="text" formControlName="PercentToDeleteWhenFull">
+            </mat-form-field>
+            <div class="form-validation-warning" *ngIf="updateSettingForm.get('PercentToDeleteWhenFull')?.errors?.['required']">
+                This field is required.
+            </div>
+            <div class="form-validation-warning" 
+                *ngIf="updateSettingForm.get('PercentToDeleteWhenFull')?.errors?.['pattern'] ||
+                updateSettingForm.get('PercentToDeleteWhenFull')?.errors?.['min'] ||
+                updateSettingForm.get('PercentToDeleteWhenFull')?.errors?.['max']"
+            >
+                Percent to delete when full should be an integer between 5 and 90.
+            </div>
+
+            <mat-form-field appearance="fill">
+                <mat-label for="search-cam-minutes">Search camera period (minutes) [int, 1-60]</mat-label>
+                <input matInput type="text" formControlName="SearchCamerasMinutes">
+            </mat-form-field>
+            <div class="form-validation-warning" *ngIf="updateSettingForm.get('SearchCamerasMinutes')?.errors?.['required']">
+                This field is required.
+            </div>
+            <div class="form-validation-warning" 
+                *ngIf="updateSettingForm.get('SearchCamerasMinutes')?.errors?.['pattern'] ||
+                updateSettingForm.get('SearchCamerasMinutes')?.errors?.['min'] ||
+                updateSettingForm.get('SearchCamerasMinutes')?.errors?.['max']"
+            >
+                Search camera period should be an integer between 1 and 60.
+            </div>
+
+            <mat-form-field appearance="fill">
+                <mat-label for="image-storage-size-control-minutes">Storage space control period (minutes) [int, 1-30]</mat-label>
+                <input matInput type="text" formControlName="ImageStorageSizeControlMinutes">
+            </mat-form-field>
+            <div class="form-validation-warning" *ngIf="updateSettingForm.get('ImageStorageSizeControlMinutes')?.errors?.['required']">
+                This field is required.
+            </div>
+            <div class="form-validation-warning" 
+                *ngIf="updateSettingForm.get('ImageStorageSizeControlMinutes')?.errors?.['pattern'] ||
+                updateSettingForm.get('ImageStorageSizeControlMinutes')?.errors?.['min'] ||
+                updateSettingForm.get('ImageStorageSizeControlMinutes')?.errors?.['max']"
+            >
+                Storage space control period should be an integer between 1 and 30.
+            </div>
+
+            <div class="form-buttons">
+                <button mat-flat-button color="primary" type="submit" [disabled]="!updateSettingForm.valid">
+                    Update Settings
+                </button>
+                <button mat-flat-button color="primary" type="button" (click)="onRestartBackend()">
+                    Restart Backend
+                </button>
+                <mat-spinner *ngIf="submissionLoading" diameter="20" color="accent"></mat-spinner>
+            </div>
+            
+        </form>
+    </div>
+    <div class="section-box">
+        <h2>Backend Log <button mat-flat-button color="primary"
+            (click)="toggleLogArea()">{{logIsOpen?'Close':'Open'}}</button></h2>
+        <p *ngIf="logIsOpen" [innerHTML]="backendLog">
+        </p>
+    </div>
+</div>
+

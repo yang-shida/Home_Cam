@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { BackendSettingService } from './backend-setting.service';
 import { CameraService } from './camera.service';
 
 @Component({
@@ -8,7 +10,16 @@ import { CameraService } from './camera.service';
 })
 export class AppComponent {
   title = 'Home-Cam-Frontend';
-  constructor (private cameraServices: CameraService){
+
+  backendLogSubscription: Subscription;
+
+  constructor (private cameraServices: CameraService, private backendSettingService: BackendSettingService){
     this.cameraServices.getActiveCameras().subscribe();
+    this.backendLogSubscription = this.backendSettingService.connectBackendLog().subscribe();
+  }
+
+  ngOnDestroy(): void{
+    window.stop();
+    this.backendLogSubscription.unsubscribe();
   }
 }

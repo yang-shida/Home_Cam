@@ -16,13 +16,13 @@ export class CameraCardListComponent implements OnInit {
   ngOnInit(): void {
     this.cameraServices.getActiveCameras().subscribe(
       camInfoList => {
-        if(camInfoList.length==1 && camInfoList[0].ipAddr=='N/A'){
+        if(camInfoList.length==1 && camInfoList[0].IpAddr=='N/A'){
           this.camIdList=[];
         }
         else{
           this.camIdList=camInfoList.map(
             camInfo=>{
-              return camInfo.uniqueId;
+              return camInfo.UniqueId;
             }
           )
         }
@@ -35,13 +35,13 @@ export class CameraCardListComponent implements OnInit {
     this.cameraServices.refreshCameraList().subscribe(
       camInfoList => {
         this.showRefreshSpinner=false;
-        if(camInfoList.length==1 && camInfoList[0].ipAddr=='N/A'){
+        if(camInfoList.length==1 && camInfoList[0].IpAddr=='N/A'){
           this.camIdList=[];
         }
         else{
           this.camIdList=camInfoList.map(
             camInfo=>{
-              return camInfo.uniqueId;
+              return camInfo.UniqueId;
             }
           )
         }

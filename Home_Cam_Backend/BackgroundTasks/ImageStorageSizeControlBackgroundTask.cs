@@ -121,6 +121,10 @@ namespace Home_Cam_Backend.BackgroundTasks
 
                 string[] fileNames = Directory.GetFiles(camDir);
                 long utcMsCutoff = (await capturedImageInfoRepository.GetOldestImageDate(camId)).ToUnixTimeMilliseconds();
+                if(utcMsCutoff==DateTimeOffset.MinValue.ToUnixTimeMilliseconds())
+                {
+                    continue;
+                }
                 foreach (string fileName in fileNames)
                 {
                     int begin = fileName.LastIndexOf('\\') + 1;

@@ -10,7 +10,7 @@ h1{
 }
 
 .section-box{
-    width: 70%;
+    width: 80%;
     padding: 5vh;
     border: 2px solid black;
     border-radius: 2vh;
@@ -44,4 +44,13 @@ h1{
     margin-bottom: 1em;
     margin-left: 1em;
     color:tomato;
+}
+
+p{
+    font-family: 'Courier New', Courier, monospace;
+    max-height: 50vh;
+    overflow-y: scroll;
+    white-space: nowrap;
+    display: flex;
+    flex-direction: column-reverse;
 }

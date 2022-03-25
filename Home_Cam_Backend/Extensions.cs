@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -10,7 +11,7 @@ using FFMediaToolkit.Graphics;
 using Home_Cam_Backend.Controllers;
 using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
-
+using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -18,7 +19,18 @@ namespace Home_Cam_Backend
 {
     public static class Extensions
     {
+
+        public static TaskCompletionSource<string> tcs = null;
+
         private static Mutex mut = new Mutex();
+
+        private static IConfiguration configuration;
+
+        public static void Init(IConfiguration _configuration)
+        {
+            configuration=_configuration;
+        }
+
         public static (string gatewayAddress, string subnetMask) getGatewayAddressAndSubnetMask()
         {
             string gatewayAddress="", subnetMask="";
@@ -128,8 +140,12 @@ namespace Home_Cam_Backend
             };
         }
 
-        public static void WriteToLogFile(string content, string path="D:/Download/ConsoleOutput.txt")
+        public static void WriteToLogFile(string content, string path = "")
         {
+            if(path=="")
+            {
+                path=configuration.GetSection("BackendLog").GetValue<string>("LogFilePath");
+            }
             mut.WaitOne();
             using(FileStream ostrm = new(path, FileMode.OpenOrCreate | FileMode.Append, FileAccess.Write))
             {
@@ -142,6 +158,7 @@ namespace Home_Cam_Backend
                 }
             }
             mut.ReleaseMutex();
+            tcs?.TrySetResult(content);
         }
 
         public static Image<Bgr24> ToBitmap(this ImageData imageData)

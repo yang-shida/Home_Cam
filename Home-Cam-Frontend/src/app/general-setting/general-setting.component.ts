@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AskForRebootDialogComponent } from '../ask-for-reboot-dialog/ask-for-reboot-dialog.component';
 import { BackendSettingService } from '../backend-setting.service';
 import { EnterPwdDialogComponent } from '../enter-pwd-dialog/enter-pwd-dialog.component';
@@ -31,7 +31,15 @@ export class GeneralSettingComponent implements OnInit {
   submissionLoading: boolean = false;
   pwdDialogIsOpen: boolean = false;
 
+  backendLogSubscription: Subscription;
+  backendLog: string = this.backendSettingService.backendLog;
+
   constructor(private backendSettingService: BackendSettingService, public dialog: MatDialog, private _snackBar: MatSnackBar) {
+    this.backendLogSubscription = this.backendSettingService.onBackendLogChange().subscribe(
+      log => {
+        this.backendLog = log;
+      }
+    )
   }
 
   ngOnInit(): void {

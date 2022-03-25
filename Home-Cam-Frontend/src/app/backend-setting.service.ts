@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, Subject, Subscriber, tap } from 'rxjs';
 import { AuthInfo } from './objects/AuthInfo';
 import { SystemSetting } from './objects/SystemSetting';
 
@@ -21,17 +21,19 @@ export class BackendSettingService {
     ImageStorageSizeControlMinutes: -1
   };
 
-  backendLog: string[] = [];
+  backendLog: string = "";
+
+  private backendLogSubject: Subject<string> = new Subject<string>();
 
   constructor(private http: HttpClient) {
 
   }
 
-  toggleSettingForm(): void{
+  toggleSettingForm(): void {
     this.settingFormIsOpen = !this.settingFormIsOpen;
   }
 
-  toggleLogArea(): void{
+  toggleLogArea(): void {
     this.logIsOpen = !this.logIsOpen;
   }
 
@@ -58,7 +60,7 @@ export class BackendSettingService {
 
   updateBackendSettings(newSetting: SystemSetting): Observable<SystemSetting> {
     let fullUrl = `${this.settingUrl}`;
-    return this.http.put(fullUrl, newSetting, {responseType: 'text'}).pipe(
+    return this.http.put(fullUrl, newSetting, { responseType: 'text' }).pipe(
       tap(
         res => {
           this.systemSetting = newSetting;
@@ -84,7 +86,7 @@ export class BackendSettingService {
       CurrPwd: pwd,
       NewPwd: ""
     };
-    return this.http.post(fullUrl, authInfo, {responseType: 'text'}).pipe(
+    return this.http.post(fullUrl, authInfo, { responseType: 'text' }).pipe(
       map(
         (res) => {
           return true;
@@ -104,7 +106,7 @@ export class BackendSettingService {
       CurrPwd: pwd,
       NewPwd: ""
     };
-    return this.http.post(fullUrl, authInfo, {responseType: 'text'}).pipe(
+    return this.http.post(fullUrl, authInfo, { responseType: 'text' }).pipe(
       map(
         (res) => {
           return true;
@@ -117,6 +119,24 @@ export class BackendSettingService {
       )
     ) as Observable<boolean>
   }
-  
+
+  connectBackendLog(): Observable<string> {
+    return new Observable<string>(
+      obs => {
+        const es = new EventSource(`${this.settingUrl}/logs`);
+        es.addEventListener('message', (evt) => {
+          let htmlNewLineStr: string = evt.data;
+          this.backendLog += (htmlNewLineStr + '<br>');
+          this.backendLogSubject.next(this.backendLog);
+          obs.next(evt.data);
+        });
+        return () => es.close();
+      });
+  }
+
+  onBackendLogChange(): Observable<string> {
+    return this.backendLogSubject.asObservable();
+  }
+
 
 }

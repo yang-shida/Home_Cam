@@ -37,7 +37,6 @@ namespace Home_Cam_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
 
             services.AddHostedService<ImageCaptureBackgroundTask>();
             services.AddHostedService<SearchCamBackgroundTask>();
@@ -60,6 +59,8 @@ namespace Home_Cam_Backend
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Home_Cam_Backend", Version = "v1" });
             });
+
+            Extensions.Init(Configuration);
 
 
         }

@@ -80,19 +80,7 @@
     <div class="section-box">
         <h2>Backend Log <button mat-flat-button color="primary"
             (click)="toggleLogArea()">{{logIsOpen?'Close':'Open'}}</button></h2>
-        <p *ngIf="logIsOpen">
-            As you can see here,once we have passed the variable y to the function square, the value of y is copied to
-            the variable x by javascript (hence pass by value).
-
-            Note that passing a functional argument by value does not have an impact on the original variable itself, as
-            when you create a new variable (y in this case) and assign it to the value of another variable (x), another
-            spot in memory separate from the original variable is created and a copy of (x) is placed in the new
-            variables spot in memory. So, by value copies the value of the original variable (a) into two separate spots
-            in memory.
-
-            On the other hand, in this case had we passed variable y by reference, then its value would have changed to
-            100, as in pass by reference, the function takes the original variable itself and uses it in the function
-            rather than using a copy of the variable.
+        <p *ngIf="logIsOpen" [innerHTML]="backendLog">
         </p>
     </div>
 </div>

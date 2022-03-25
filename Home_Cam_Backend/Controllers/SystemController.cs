@@ -88,6 +88,32 @@ namespace Home_Cam_Backend.Controllers
             return Ok(res);
         }
 
+        [HttpGet("logs")]
+        public async Task GetLogs()
+        {
+            var response = Response;
+            response.Headers.Add("Content-Type", "text/event-stream");
+
+            string currentLog = System.IO.File.ReadAllText(@configuration.GetSection("BackendLog").GetValue<string>("LogFilePath"));
+            currentLog = currentLog.Replace("\r\n", "<br>");
+            currentLog = currentLog.Substring(0, currentLog.LastIndexOf("<br>"));
+            await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {currentLog}\r\n\r\n"));
+            await response.Body.FlushAsync();
+
+            while(!Request.HttpContext.RequestAborted.IsCancellationRequested)
+            {
+                Extensions.tcs = new();
+                Task completedTask = await Task.WhenAny(Extensions.tcs.Task, Task.Delay(2000));
+                if(completedTask==Extensions.tcs.Task)
+                {
+                    string newMsg = await Extensions.tcs.Task;
+                    await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {newMsg}\r\n\r\n"));
+                    await response.Body.FlushAsync();
+                }
+                
+            }
+        }
+
         [HttpPut]
         public ActionResult<string> changeSettings(SystemSettingsDto newSettings)
         {

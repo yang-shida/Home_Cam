@@ -11,7 +11,7 @@ import { CameraService } from '../camera.service';
 export class CctvViewComponent implements OnInit {
 
   camIdList: string[] = []
-  videoScreensPerRow: number = 3;
+  videoScreensPerRow: number = 2;
 
   private localCamListSubscription: Subscription;
 
@@ -32,10 +32,6 @@ export class CctvViewComponent implements OnInit {
 
   onSelectItemsPerRow(num: number): void {
     this.videoScreensPerRow=num;
-  }
-
-  ngOnDestroy(): void{
-    window.stop();
   }
 
 }

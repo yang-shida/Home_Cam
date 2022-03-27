@@ -97,7 +97,7 @@ namespace Home_Cam_Backend.Controllers
             string currentLog = System.IO.File.ReadAllText(@configuration.GetSection("BackendLog").GetValue<string>("LogFilePath"));
             currentLog = currentLog.Replace("\r\n", "<br>");
             currentLog = currentLog.Substring(0, currentLog.LastIndexOf("<br>"));
-            await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {currentLog}\r\n\r\n"));
+            await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {currentLog}\n\n"));
             await response.Body.FlushAsync();
 
             while(!Request.HttpContext.RequestAborted.IsCancellationRequested)
@@ -107,7 +107,7 @@ namespace Home_Cam_Backend.Controllers
                 if(completedTask==Extensions.tcs.Task)
                 {
                     string newMsg = await Extensions.tcs.Task;
-                    await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {newMsg}\r\n\r\n"));
+                    await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {newMsg}\n\n"));
                     await response.Body.FlushAsync();
                 }
                 

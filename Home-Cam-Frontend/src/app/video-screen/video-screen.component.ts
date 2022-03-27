@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CameraService } from '../camera.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-video-screen',
@@ -8,22 +10,29 @@ import { CameraService } from '../camera.service';
 })
 export class VideoScreenComponent implements OnInit {
 
-  videoUrl: string = "N/A";
   @Input() camId: string = "N/A";
   @Input() startTime: number = -1;
+  currFrame: string = "";
+  videoUrl: SafeUrl = "";
 
   isPlaying: boolean = true;
 
-  constructor(private cameraServices: CameraService) { }
+  videoFrameSubscription?: Subscription;
+
+  constructor(private cameraServices: CameraService, private domSanitizer: DomSanitizer) { 
+    
+  }
 
   ngOnInit(): void {
-    if(this.startTime==-1){
-      this.videoUrl=this.cameraServices.getStreamingUrl(this.camId);
-    }
-    else{
-      this.videoUrl=this.cameraServices.getPlaybackUrl(this.camId, this.startTime)
-    }
-    
+    this.videoFrameSubscription = this.cameraServices.connentVideo(this.camId, this.startTime==-1?null: this.startTime).subscribe(
+      imgBase64 => {
+        this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl(`data:image/jpeg;base64, ${imgBase64}`);
+      }
+    );
+  }
+
+  ngOnDestroy(): void{
+    this.videoFrameSubscription==null?"":this.videoFrameSubscription.unsubscribe();
   }
 
 }

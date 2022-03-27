@@ -49,10 +49,8 @@ namespace Home_Cam_Backend.Controllers
         public async Task Streaming(string camId, long? startTimeUtc = null)
         {
 
-
-            Response.StatusCode = 206;
-            Response.ContentType = "multipart/x-mixed-replace; boundary=frame";
-            Response.Headers.Add("Connection", "Keep-Alive");
+            var response = Response;
+            response.Headers.Add("Content-Type", "text/event-stream");
 
             long? currentTimeUtc = startTimeUtc;
 
@@ -81,17 +79,10 @@ namespace Home_Cam_Backend.Controllers
 
                     byte[] image = cam.ImageBuffer[imageIndex].image;
 
-                    string header =
-                        "--frame" + "\r\n" +
-                        "Content-Type:image/jpeg\r\n" +
-                        "Content-Length:" + image.Length + "\r\n\r\n";
+                    string imageBase64Str = Convert.ToBase64String(image);
 
-                    string footer = "\r\n";
-
-                    await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(header));
-                    await Response.Body.WriteAsync(image);
-                    await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
-                    await Response.Body.FlushAsync();
+                    await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {imageBase64Str}\n\n"));
+                    await response.Body.FlushAsync();
 
 
                 }
@@ -117,19 +108,10 @@ namespace Home_Cam_Backend.Controllers
                     string imagePath = imageInfoList.Last().ImageFileLocation;
                     byte[] image = await System.IO.File.ReadAllBytesAsync(imagePath);
 
-                    string header =
-                        "--frame" + "\r\n" +
-                        "Content-Type:image/jpeg\r\n" +
-                        "Content-Length:" + image.Length + "\r\n\r\n";
+                    string imageBase64Str = Convert.ToBase64String(image);
 
-                    string footer = "\r\n";
-
-                    await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(header));
-                    await Response.Body.WriteAsync(image);
-                    await Response.Body.WriteAsync(Encoding.ASCII.GetBytes(footer));
-                    await Response.Body.FlushAsync();
-
-
+                    await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {imageBase64Str}\n\n"));
+                    await response.Body.FlushAsync();
 
                 }
 

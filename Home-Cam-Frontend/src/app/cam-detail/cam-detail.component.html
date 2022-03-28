@@ -10,7 +10,11 @@
                         </div>
                     </div>
                 </div>
-                <mat-slider thumbLabel [value]="videoWidth" (input)="videoWidthSliderChange($event)" min="1" max="100" vertical="true" [displayWith]="videoWidthSliderDisplayFormat" style="height: 30vh; width: 5vw; position: fixed; left: 100%; top: 50%; transform: translate(-100%, -50%);"></mat-slider>
+                <div class="video-size-slider-container">
+                    <p>Video Size</p>
+                    <mat-slider thumbLabel [value]="videoWidth" (input)="videoWidthSliderChange($event)" min="1" max="100" vertical="true" [displayWith]="videoWidthSliderDisplayFormat" ></mat-slider>
+                </div>
+                
             </mat-tab>
             <mat-tab label="Playback"> 
                 <div class="live-playback-tab-container">

@@ -16,6 +16,9 @@ import {MatInputModule} from '@angular/material/input';
 import { ReactiveFormsModule,FormsModule  } from '@angular/forms';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatSliderModule} from '@angular/material/slider';
+
 
 
 import { AppComponent } from './app.component';
@@ -70,6 +73,8 @@ const appRoutes: Routes = [
     FormsModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatTabsModule,
+    MatSliderModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

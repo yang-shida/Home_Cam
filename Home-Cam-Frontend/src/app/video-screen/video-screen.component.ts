@@ -12,7 +12,6 @@ export class VideoScreenComponent implements OnInit {
 
   @Input() camId: string = "N/A";
   @Input() startTime: number = -1;
-  currFrame: string = "";
   videoUrl: SafeUrl = "";
 
   isPlaying: boolean = true;
@@ -20,10 +19,13 @@ export class VideoScreenComponent implements OnInit {
   videoFrameSubscription?: Subscription;
 
   constructor(private cameraServices: CameraService, private domSanitizer: DomSanitizer) { 
-    
   }
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(): void {
+    this.videoFrameSubscription==null?console.log("null"):this.videoFrameSubscription.unsubscribe();
     this.videoFrameSubscription = this.cameraServices.connentVideo(this.camId, this.startTime==-1?null: this.startTime).subscribe(
       imgBase64 => {
         this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl(`data:image/jpeg;base64, ${imgBase64}`);

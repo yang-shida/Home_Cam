@@ -96,7 +96,6 @@ export class CameraService {
 
     return new Observable<string>(
       obs => {
-        console.log(fullUrl)
         const es = new EventSource(fullUrl);
         es.addEventListener('message', (evt) => {
           obs.next(evt.data);

@@ -1,1 +1,34 @@
-<p>cam-detail works! {{camId}}</p>
+<div [style.--video-screen-size]="videoWidth+'%'">
+    
+    <mat-tab-group class="live-playback-tab" mat-align-tabs="center">
+
+            <mat-tab label="Live">
+                <div class="live-playback-tab-container">
+                    <div class="cam-detail-page-content">
+                        <div class="video-screen-container">
+                            <app-video-screen camId={{camId}}></app-video-screen>
+                        </div>
+                    </div>
+                </div>
+                <mat-slider thumbLabel [value]="videoWidth" (input)="videoWidthSliderChange($event)" min="1" max="100" vertical="true" [displayWith]="videoWidthSliderDisplayFormat" style="height: 30vh; width: 5vw; position: fixed; left: 100%; top: 50%; transform: translate(-100%, -50%);"></mat-slider>
+            </mat-tab>
+            <mat-tab label="Playback"> 
+                <div class="live-playback-tab-container">
+                    <div class="cam-detail-page-content">
+                        Content 2
+                    </div>
+                </div>
+            </mat-tab>
+            <mat-tab label="Setting"> 
+                <div class="live-playback-tab-container">
+                    <div class="cam-detail-page-content">
+                        Content 2
+                    </div>
+                </div>
+            </mat-tab>
+        
+    </mat-tab-group>
+    
+</div>
+
+

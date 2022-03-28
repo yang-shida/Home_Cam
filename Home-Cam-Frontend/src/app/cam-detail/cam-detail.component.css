@@ -1,0 +1,43 @@
+.live-playback-tab {
+    width: 100%;
+}
+
+.live-playback-tab-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+
+.cam-detail-page-content {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.video-screen-container {
+    width: var(--video-screen-size);
+    align-self: center;
+}
+
+.video-size-slider-container {
+    height: 40vh;
+    width: 5vw;
+    position: fixed;
+    left: 100%;
+    top: 50%;
+    transform: translate(-100%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.video-size-slider-container>p {
+    font-size: large;
+    text-align: center;
+}
+
+mat-slider {
+    height: 100%;
+}

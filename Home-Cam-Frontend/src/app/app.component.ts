@@ -19,7 +19,6 @@ export class AppComponent {
   }
 
   ngOnDestroy(): void{
-    window.stop();
     this.backendLogSubscription.unsubscribe();
   }
 }

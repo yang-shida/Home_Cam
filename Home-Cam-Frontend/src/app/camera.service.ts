@@ -27,11 +27,11 @@ export class CameraService {
   }
 
   delay(ms: number) {
-      return new Promise( resolve => setTimeout(resolve, ms) );
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   // camera services
-  onLocalCamListUpdate(): Observable<CamBasicInfo[]>{
+  onLocalCamListUpdate(): Observable<CamBasicInfo[]> {
     return this.localCamListSubject.asObservable();
   }
 
@@ -45,7 +45,7 @@ export class CameraService {
       tap(
         (camInfoList) => {
           this.lastLocalCamListUpdateTime = Date.now();
-          this.localCamList=camInfoList;
+          this.localCamList = camInfoList;
           this.localCamListSubject.next(camInfoList);
         }
       ),
@@ -67,7 +67,7 @@ export class CameraService {
       tap(
         camInfoList => {
           this.lastLocalCamListUpdateTime = Date.now();
-          this.localCamList=camInfoList;
+          this.localCamList = camInfoList;
           this.localCamListSubject.next(camInfoList);
         }
       ),
@@ -85,6 +85,24 @@ export class CameraService {
 
   getCameraPreviewImageUrl(camId: string): string {
     return `${this.cameraUrl}/${camId}/preview?cb=${Date.now()}`;
+  }
+
+  connentVideo(camId: string, startTimeUtc: number | null = null): Observable<string> {
+    let fullUrl: string = startTimeUtc == null ? 
+                          `${this.cameraUrl}/${camId}?cb=${Date.now()}` : 
+                          `${this.cameraUrl}/${camId}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
+
+    
+
+    return new Observable<string>(
+      obs => {
+        const es = new EventSource(fullUrl);
+        es.addEventListener('message', (evt) => {
+          obs.next(evt.data);
+        });
+        return () => es.close();
+      }
+    );
   }
 
   getStreamingUrl(camId: string): string {

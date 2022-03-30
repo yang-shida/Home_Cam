@@ -52,6 +52,7 @@ namespace Home_Cam_Backend
                         }
                         else
                         {
+                            Console.WriteLine("Stop finding camera. Not in IPv4 network.");
                             subnetMask="N/A";
                         }
                     }

@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using FFmpeg.AutoGen;
 using Home_Cam_Backend.BackgroundTasks;
 using Home_Cam_Backend.Dtos;
 using Home_Cam_Backend.Entities;
@@ -56,6 +57,10 @@ namespace Home_Cam_Backend.Controllers
 
             long lastTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
+            List<ECapturedImageInfo>[] imageInfoList = {new(), new()};
+            int currList = 0;
+            bool isFetchingImageInfo = false;
+
             while (!Request.HttpContext.RequestAborted.IsCancellationRequested)
             {
                 var delay = Task.Delay(100);
@@ -89,29 +94,81 @@ namespace Home_Cam_Backend.Controllers
                 else
                 {
                     long currTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    // Console.WriteLine($"FPS: {1000/((double)(currTime-lastTime))}");
+                    // Console.WriteLine($"FPS: {1000 / ((double)(currTime - lastTime))}");
                     currentTimeUtc += (currTime - lastTime);
                     lastTime = currTime;
-                    // fetch next image info from DB
-                    // get -5 seconds
-                    DateTimeOffset begin = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc - 5 * 1000);
-                    DateTimeOffset end = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc);
-                    List<ECapturedImageInfo> imageInfoList = await capturedImagesRepository.GetImageInfos(camId, begin, end);
+
+                    // just started
+                    if(imageInfoList[currList].Count == 0)
+                    {
+                        // Console.WriteLine("Fetch first new batch");
+                        // fetch next image info from DB
+                        DateTimeOffset begin = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc);
+                        DateTimeOffset end = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc + 15 * 1000);
+                        imageInfoList[currList] = await capturedImagesRepository.GetImageInfos(camId, begin, end);
+                        // if no more image near the selected time
+                        if (imageInfoList[currList].Count == 0)
+                        {
+                            await Response.Body.WriteAsync(Encoding.ASCII.GetBytes("No more recordings."));
+                            return;
+                        }
+                    }
+                    // need to fetch next batch
+                    else if(!isFetchingImageInfo && currentTimeUtc + 3000 > imageInfoList[currList].Last().CreatedDate.ToUnixTimeMilliseconds())
+                    {
+                        // fetch next image info from DB
+                        // Console.WriteLine("Fetch new batch");
+                        DateTimeOffset begin = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc + 3000);
+                        DateTimeOffset end = DateTimeOffset.FromUnixTimeMilliseconds((long)currentTimeUtc + 3000 + 15 * 1000);
+                        isFetchingImageInfo = true;
+                        Task.Run(
+                            async () => {
+                                imageInfoList[1-currList] = await capturedImagesRepository.GetImageInfos(camId, begin, end);
+                                // if(imageInfoList[1-currList].Count==0)
+                                // {
+                                //     Console.WriteLine("Nothing fetched");
+                                // }
+                                // Console.WriteLine("Fetch done");
+                            }
+                        );
+                        
+                    }
+
+                    if (currentTimeUtc > imageInfoList[currList].Last().CreatedDate.ToUnixTimeMilliseconds())
+                    {
+                        isFetchingImageInfo = false;
+                        currList = 1-currList;
+                    }
 
                     // if no more image near the selected time
-                    if (imageInfoList.Count == 0)
+                    if (imageInfoList[currList].Count == 0)
                     {
-                        await Response.Body.WriteAsync(Encoding.ASCII.GetBytes("No more recordings."));
+                        // Console.WriteLine("Exiting");
                         return;
                     }
 
-                    string imagePath = imageInfoList.Last().ImageFileLocation;
-                    byte[] image = await System.IO.File.ReadAllBytesAsync(imagePath);
+                    ECapturedImageInfo imageInfo = imageInfoList[currList].Find(
+                        imgInfo => imgInfo.CreatedDate.ToUnixTimeMilliseconds() > currentTimeUtc
+                    );
 
-                    string imageBase64Str = Convert.ToBase64String(image);
+                    if (imageInfo != null)
+                    {
+                        string imagePath = imageInfo.ImageFileLocation;
+                        byte[] image = await System.IO.File.ReadAllBytesAsync(imagePath);
 
-                    await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {imageBase64Str}\n\n"));
-                    await response.Body.FlushAsync();
+                        string imageBase64Str = Convert.ToBase64String(image);
+
+                        ControlledFrameDto frame = new()
+                        {
+                            TimeSinceStartMs = (long)currentTimeUtc - (long)startTimeUtc,
+                            ImageBase64Str = imageBase64Str
+                        };
+
+                        await response.Body.WriteAsync(Encoding.ASCII.GetBytes($"data: {Newtonsoft.Json.JsonConvert.SerializeObject(frame)}\n\n"));
+                        await response.Body.FlushAsync();
+                    }
+
+
 
                 }
 

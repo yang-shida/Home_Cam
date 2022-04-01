@@ -15,6 +15,6 @@ namespace Home_Cam_Backend.Repositories
         Task<long> GetTotalSize();
         Task<List<ECapturedImageInfo>> GetOldestN(int N);
         Task<DateTimeOffset> GetOldestImageDate(string camId);
-        Task<List<TimeIntervalDto>> GetRecordedTimeIntervals(string camId, long startTimeUtc, long timeLengthMillis, long thresholdMillis);
+        Task<List<TimeIntervalDto>> GetRecordedTimeIntervals(string camId, long? startTimeUtc, long? timeLengthMillis, long thresholdMillis);
     }
 }

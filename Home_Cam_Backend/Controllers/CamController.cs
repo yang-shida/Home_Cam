@@ -226,7 +226,7 @@ namespace Home_Cam_Backend.Controllers
         }
 
         [HttpGet("{camId}/available_recording_time_intervals")]
-        public async Task<ActionResult<List<TimeIntervalDto>>> GetAvailableRecordingTimeIntervals(string camId, long startTimeUtc, long timeLengthMillis)
+        public async Task<ActionResult<List<TimeIntervalDto>>> GetAvailableRecordingTimeIntervals(string camId, long? startTimeUtc, long? timeLengthMillis)
         {
             long thresholdMillis = configuration.GetSection("CamControllerSettings").GetValue<long>("DistinctVideosThresholdSeconds") * 1000;
             List<TimeIntervalDto> timeIntervals = await capturedImagesRepository.GetRecordedTimeIntervals(camId, startTimeUtc, timeLengthMillis, thresholdMillis);

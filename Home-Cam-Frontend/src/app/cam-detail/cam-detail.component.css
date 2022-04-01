@@ -75,3 +75,11 @@ mat-slider {
 .setting-line>button {
     width: fit-content;
 }
+
+.date-picker {
+    align-self: center;
+
+    margin-top: 2vh;
+    width: 50%;
+    min-width: 200px;
+}

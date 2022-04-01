@@ -17,8 +17,23 @@ export class VideoScreenComponent implements OnInit {
   isPlaying: boolean = true;
 
   videoFrameSubscription?: Subscription;
+  camListSubscription?: Subscription;
 
   constructor(private cameraServices: CameraService, private domSanitizer: DomSanitizer) {
+    this.camListSubscription = this.cameraServices.onLocalCamListUpdate().subscribe(
+      newCamList => {
+        if (this.cameraServices.isCamActive(this.camId)) {
+          this.videoFrameSubscription = this.cameraServices.connentVideo(this.camId, this.startTime == -1 ? null : this.startTime).subscribe(
+            imgBase64 => {
+              this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl(`data:image/jpeg;base64, ${imgBase64}`);
+            }
+          );
+        }
+        else {
+          this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl("../../assets/cam_not_active.jpg");
+        }
+      }
+    )
   }
 
   ngOnInit(): void {

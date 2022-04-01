@@ -17,11 +17,6 @@
 
     display: flex;
     overflow: hidden;
-
-    position: fixed;
-    top: 95vh;
-    left: 50%;
-    transform: translate(-50%, -100%);
 }
 
 #item-per-row-selection>button {
@@ -33,4 +28,17 @@
 
 #floating-botton-spacer {
     height: 13vh;
+}
+
+.floating-elements{
+    margin: 0;
+    position: fixed;
+    top: 95vh;
+    left: 50%;
+    transform: translate(-50%, -100%);
+    font-size: 15pt;
+
+    display: flex;
+    column-gap: 5vh;
+    align-items: center;
 }

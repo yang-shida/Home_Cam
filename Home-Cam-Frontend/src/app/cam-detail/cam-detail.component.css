@@ -13,7 +13,6 @@
     width: 80%;
     display: flex;
     flex-direction: column;
-
 }
 
 .video-screen-container {
@@ -40,4 +39,39 @@
 
 mat-slider {
     height: 100%;
+}
+
+.setting-line:first-of-type {
+    margin-top: 4vh;
+}
+
+.setting-line {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 3vh;
+    align-items: center;
+    margin: 2vh;
+
+    font-size: larger;
+}
+
+.setting-label {
+    justify-self: end;
+}
+
+.setting-control {
+    justify-self: start;
+}
+
+.setting-line:last-of-type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2vh;
+
+    font-size: larger;
+}
+
+.setting-line>button {
+    width: fit-content;
 }

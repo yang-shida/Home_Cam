@@ -1,6 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatSliderChange } from '@angular/material/slider';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, Subscription } from 'rxjs';
+import { CameraService } from '../camera.service';
+import { CamSetting } from '../objects/CamSetting';
 import { SideBarSelectionService } from '../side-bar-selection.service';
 import { UiService } from '../ui.service';
 
@@ -18,10 +21,17 @@ export class CamDetailComponent implements OnInit {
   camId: string = "N/A";
   currCamIdSubscription: Subscription;
 
-  constructor(private sideBarSelectionServices: SideBarSelectionService, private uiService: UiService) {
+  camSetting?: CamSetting;
+
+  constructor(private sideBarSelectionServices: SideBarSelectionService, private uiService: UiService, private cameraService: CameraService, private _snackBar: MatSnackBar) {
     this.currCamIdSubscription = this.sideBarSelectionServices.onSelectedCamUpdate().subscribe(
       camId => {
         this.camId = camId;
+        this.cameraService.getCamSetting(camId).subscribe(
+          camSettingFromServer => {
+            this.camSetting = camSettingFromServer;
+          }
+        );
       }
     );
     this.videoWidthSubscription = this.uiService.onCamDetailPageVideoWidthChange().subscribe(
@@ -32,13 +42,30 @@ export class CamDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
   }
 
   videoWidthSliderDisplayFormat(num: number): string {
-    return num+"%";
+    return num + "%";
   }
   videoWidthSliderChange(sliderChangeEvent: MatSliderChange): void {
-    this.uiService.setCamDetailPageVideoWidth(sliderChangeEvent.value==null?this.videoWidth:sliderChangeEvent.value);
+    this.uiService.setCamDetailPageVideoWidth(sliderChangeEvent.value == null ? this.videoWidth : sliderChangeEvent.value);
+  }
+
+  onChangeSetting(): void {
+    if (this.camSetting != null) {
+      this.cameraService.updateCamSetting(this.camSetting).subscribe(
+        feedbackCamSetting => {
+          if(feedbackCamSetting.UniqueId=="N/A"){
+            this._snackBar.open('Something is wrong. Unable to update settings!', undefined, { duration: 2000 })
+          }
+          else{
+            this._snackBar.open('Setting updated!', undefined, { duration: 2000 })
+            this.camSetting = feedbackCamSetting
+          }
+        }
+      );
+    }
   }
 
 }

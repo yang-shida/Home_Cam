@@ -22,15 +22,17 @@ namespace Home_Cam_Backend.Controllers
     {
         private readonly ICamSettingsRepository repository;
         private readonly ICapturedImagesRepository capturedImagesRepository;
+        private readonly ICamSettingsRepository camSettingsRepository;
         private readonly IConfiguration configuration;
         public static List<Esp32Cam> ActiveCameras = new();
 
 
-        public CamController(ICamSettingsRepository repo, ICapturedImagesRepository capturedImagesRepository, IConfiguration configuration)
+        public CamController(ICamSettingsRepository repo, ICapturedImagesRepository capturedImagesRepository, IConfiguration configuration, ICamSettingsRepository camSettingsRepository)
         {
             this.repository = repo;
             this.capturedImagesRepository = capturedImagesRepository;
             this.configuration = configuration;
+            this.camSettingsRepository = camSettingsRepository;
         }
 
         [HttpGet]
@@ -42,8 +44,27 @@ namespace Home_Cam_Backend.Controllers
                 List<Esp32Cam> camList = await Esp32Cam.FindCameras(repository);
             }
 
+            List<string> camIdList = await camSettingsRepository.GetCurrentCamIds();
 
-            return ActiveCameras.Select(cam => cam.AsDto()).ToList();
+            return (camIdList.Select(
+                camId => {
+                    Esp32Cam cam = ActiveCameras.Find(cam => cam.UniqueId == camId);
+                    if(cam==null)
+                    {
+                        return new CamDto(){
+                            UniqueId=camId,
+                            IpAddr="N/A"
+                        };
+                    }
+                    else
+                    {
+                        return new CamDto(){
+                            UniqueId=camId,
+                            IpAddr=cam.IpAddr
+                        };
+                    }
+                }
+            )).ToList();
         }
 
         [HttpGet("{camId}")]

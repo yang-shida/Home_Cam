@@ -30,13 +30,20 @@
     margin-bottom: 1vmax;
 }
 
-#floating-refresh-button{
+.floating-elements{
     margin: 0;
     position: fixed;
     top: 95vh;
     left: 50%;
     transform: translate(-50%, -100%);
+    font-size: 15pt;
 
+    display: flex;
+    column-gap: 5vh;
+    align-items: center;
+}
+
+#floating-refresh-button{
     font-size: 15pt;
 }
 

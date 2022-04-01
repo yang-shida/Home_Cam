@@ -18,6 +18,7 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
 
 
@@ -75,6 +76,7 @@ const appRoutes: Routes = [
     MatDialogModule,
     MatTabsModule,
     MatSliderModule,
+    MatSlideToggleModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

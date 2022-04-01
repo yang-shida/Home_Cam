@@ -26,10 +26,6 @@ export class CameraService {
     this.lastLocalCamListUpdateTime = Date.now() - (this.localCamListRefreshPeriodSec * 1000 + 1);
   }
 
-  delay(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   // camera services
   onLocalCamListUpdate(): Observable<CamBasicInfo[]> {
     return this.localCamListSubject.asObservable();
@@ -44,6 +40,17 @@ export class CameraService {
     return this.http.get<any[]>(fullUrl).pipe(
       tap(
         (camInfoList) => {
+          camInfoList.sort(
+            (a,b) => {
+              if(a.IpAddr=="N/A" && b.IpAddr!="N/A"){
+                return 1;
+              }
+              if(a.IpAddr!="N/A" && b.IpAddr=="N/A"){
+                return -1;
+              }
+              return 0;
+            }
+          );
           this.lastLocalCamListUpdateTime = Date.now();
           this.localCamList = camInfoList;
           this.localCamListSubject.next(camInfoList);
@@ -66,6 +73,17 @@ export class CameraService {
     return this.http.get<CamBasicInfo[]>(fullUrl).pipe(
       tap(
         camInfoList => {
+          camInfoList.sort(
+            (a,b) => {
+              if(a.IpAddr=="N/A"){
+                return 1;
+              }
+              if(b.IpAddr=="N/A"){
+                return -1;
+              }
+              return 0;
+            }
+          );
           this.lastLocalCamListUpdateTime = Date.now();
           this.localCamList = camInfoList;
           this.localCamListSubject.next(camInfoList);
@@ -84,15 +102,13 @@ export class CameraService {
   }
 
   getCameraPreviewImageUrl(camId: string): string {
-    return `${this.cameraUrl}/${camId}/preview?cb=${Date.now()}`;
+    return this.isCamActive(camId)?`${this.cameraUrl}/${camId}/preview?cb=${Date.now()}`:"../../assets/cam_not_active.jpg";
   }
 
   connentVideo(camId: string, startTimeUtc: number | null = null): Observable<string> {
-    let fullUrl: string = startTimeUtc == null ? 
-                          `${this.cameraUrl}/${camId}?cb=${Date.now()}` : 
-                          `${this.cameraUrl}/${camId}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
-
-    
+    let fullUrl: string = startTimeUtc == null ?
+      `${this.cameraUrl}/${camId}?cb=${Date.now()}` :
+      `${this.cameraUrl}/${camId}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
 
     return new Observable<string>(
       obs => {
@@ -126,6 +142,10 @@ export class CameraService {
         }
       )
     )
+  }
+
+  isCamActive(camId: string): boolean {
+    return this.localCamList.find(cam => cam.UniqueId == camId && cam.IpAddr != "N/A") !== undefined;
   }
 
   // camera setting services

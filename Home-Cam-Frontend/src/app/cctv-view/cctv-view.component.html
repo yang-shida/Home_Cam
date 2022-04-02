@@ -1,6 +1,6 @@
 <div id="video-screen-list" [style.--video_screen_width]="(100/videoScreensPerRow)+'%'">
     <div id="video-screen-container" *ngFor="let camId of camIdList">
-        <app-video-screen [camId]="camId"></app-video-screen>
+        <app-video-screen [camId]="camId"  (click)="onClickCamCard(camId)" [routerLink]="'/cam-detail/'+camId"></app-video-screen>
         {{camId}}
     </div>
 </div>

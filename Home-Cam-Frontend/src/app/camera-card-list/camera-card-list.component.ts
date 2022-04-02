@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Subscription } from 'rxjs';
 import { CameraService } from '../camera.service';
+import { SideBarSelectionService } from '../side-bar-selection.service';
 import { UiService } from '../ui.service';
 
 @Component({
@@ -19,7 +20,7 @@ export class CameraCardListComponent implements OnInit {
 
   showInactiveCamSubscription: Subscription;
 
-  constructor(private cameraServices: CameraService, private uiService: UiService) {
+  constructor(private cameraServices: CameraService, private sideBarSelectionServices: SideBarSelectionService, private uiService: UiService) {
     this.showInactiveCamSubscription = this.uiService.onShowInactiveCamChange().subscribe(
       newVal => {
         this.showInactiveCam = newVal;
@@ -85,6 +86,11 @@ export class CameraCardListComponent implements OnInit {
     else {
       this.camIdList = this.completeCamIdList;
     }
+  }
+
+  onClickCamCard(camId: string): void {
+    this.sideBarSelectionServices.selectMenuItem('Cameras');
+    this.sideBarSelectionServices.selectCamera(camId);
   }
 
 }

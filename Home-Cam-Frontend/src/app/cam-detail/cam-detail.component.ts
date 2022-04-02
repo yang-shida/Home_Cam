@@ -20,6 +20,8 @@ export class CamDetailComponent implements OnInit {
   videoWidthSubscription: Subscription;
   // End CSS Variables ----------------------
 
+  submissionLoading: boolean = false;
+
   camId: string = this.sideBarSelectionServices.selectedCamSubject.value;
   currCamIdSubscription: Subscription;
 
@@ -28,6 +30,11 @@ export class CamDetailComponent implements OnInit {
 
   pickedDate?: Date;
   pickedDateTimeIntervals: CamTimeInterval[] = [];
+
+  percentage: number = 0;
+  isDown: boolean = false;
+  isPlaying: boolean = false;
+  playPauseIconUrl: string = this.isPlaying?'../../assets/pause_icon.png':'../../assets/play_icon.png';
 
   constructor(private sideBarSelectionServices: SideBarSelectionService, private uiService: UiService, private cameraService: CameraService, private _snackBar: MatSnackBar) {
     this.currCamIdSubscription = this.sideBarSelectionServices.onSelectedCamUpdate().subscribe(
@@ -48,6 +55,7 @@ export class CamDetailComponent implements OnInit {
                 this.pickedDate.getMonth(),
                 this.pickedDate.getDate()
               );
+              this.pickedDateTimeIntervals = [];
               this.cameraService.getAvailableRecordingTimeIntervals(camId, this.pickedDate.getTime(), this.pickedDate.getDate() + 1000*3600*24).subscribe(
                 pickedDateTimeIntervalsFromServer => {
                   this.pickedDateTimeIntervals = pickedDateTimeIntervalsFromServer;
@@ -77,9 +85,11 @@ export class CamDetailComponent implements OnInit {
   }
 
   onChangeSetting(): void {
+    this.submissionLoading = true;
     if (this.camSetting != null) {
       this.cameraService.updateCamSetting(this.camSetting).subscribe(
         feedbackCamSetting => {
+          this.submissionLoading = false;
           if (feedbackCamSetting.UniqueId == "N/A") {
             this._snackBar.open('Something is wrong. Unable to update settings!', undefined, { duration: 2000 })
           }
@@ -111,6 +121,7 @@ export class CamDetailComponent implements OnInit {
   onPickedDateChange(pickedDateChangeEvent: MatDatepickerInputEvent<Date>): void {
     this.pickedDate = pickedDateChangeEvent.value == null ? undefined : pickedDateChangeEvent.value;
     if(this.pickedDate){
+      this.pickedDateTimeIntervals = [];
       this.cameraService.getAvailableRecordingTimeIntervals(this.camId, this.pickedDate.getTime(), this.pickedDate.getDate() + 1000*3600*24).subscribe(
         pickedDateTimeIntervalsFromServer => {
           this.pickedDateTimeIntervals = pickedDateTimeIntervalsFromServer;
@@ -119,4 +130,37 @@ export class CamDetailComponent implements OnInit {
     }
   }
 
+  
+  onMouseDown(evt: any): void {
+    this.isDown=true;
+    this.percentage=Math.round((evt.offsetX>=0?evt.offsetX:0)/evt.currentTarget.offsetWidth*10000)/100;
+  }
+  onMouseMove(evt: any): void {
+    if(this.isDown){
+      this.percentage=Math.round((evt.offsetX>=0?evt.offsetX:0)/evt.currentTarget.offsetWidth*10000)/100;
+    }
+  }
+  onMouseUp(evt: any): void{
+    this.isDown=false;
+  }
+  onPlayPauseButtonClick(): void {
+    this.isPlaying = !this.isPlaying;
+    this.playPauseIconUrl=this.isPlaying?'../../assets/pause_icon.png':'../../assets/play_icon.png';
+  }
+  timeMarkToPercent(timeMark: number): string {
+    if(this.pickedDate!=null){
+      let percentNum: number = Math.round((timeMark - this.pickedDate.getTime())/(1000*3600*24)*10000)/100;
+      return percentNum+'%';
+    }
+    else{
+      return "0%";
+    } 
+  }
+  intervalToPercent(interval: CamTimeInterval): string {
+    let percentNum: number = Math.round((interval.End - interval.Start)/(1000*3600*24)*10000)/100;
+    return percentNum+'%';
+  }
+
+
 }
+

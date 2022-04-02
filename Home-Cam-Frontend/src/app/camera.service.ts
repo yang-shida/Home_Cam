@@ -116,7 +116,11 @@ export class CameraService {
         es.addEventListener('message', (evt) => {
           obs.next(evt.data);
         });
-        return () => es.close();
+        es.addEventListener('error', (evt) => {
+          es.close();
+          obs.next("Stream Finished!");
+        });
+        return ()=>{es.close()};
       }
     );
   }

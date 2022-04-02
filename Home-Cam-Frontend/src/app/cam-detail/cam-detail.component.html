@@ -21,7 +21,7 @@
             <div class="live-playback-tab-container">
                 <div class="cam-detail-page-content">
                     <div class="video-screen-container">
-                        <app-video-screen *ngIf="PlaybackTag.isActive" camId={{camId}}></app-video-screen>
+                        <app-video-screen *ngIf="PlaybackTag.isActive" camId={{camId}} [startTime]="1648433812040"></app-video-screen>
                     </div>
                     <div class="video-size-slider-container">
                         <p>Video Size</p>
@@ -35,6 +35,14 @@
                         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                         <mat-datepicker #picker disabled="false"></mat-datepicker>
                     </mat-form-field>
+                    <div class="playback-control-container">
+                        <img class="play-pause-icon" src={{playPauseIconUrl}} (click)="onPlayPauseButtonClick()">
+                        <div class="playback-progress-bar" (click)="onMouseUp($event)" (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)">
+                            <div class="available-regions" *ngFor="let interval of pickedDateTimeIntervals"  [style]="'left:'+timeMarkToPercent(interval.Start)+'; width: '+intervalToPercent(interval)+';'"></div>
+                            <!-- [style]="'left: '+timeMarkToPercent(interval.Start)+'%;'+'width: '+intervalToPercent(interval)+'%;'" -->
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </mat-tab>
@@ -93,6 +101,7 @@
                     </div>
                     <div class="setting-line">
                         <button mat-flat-button color="primary" (click)="onChangeSetting()">Update Setting</button>
+                        <mat-spinner *ngIf="submissionLoading" diameter="20" color="accent"></mat-spinner>
                     </div>
                 </div>
             </div>

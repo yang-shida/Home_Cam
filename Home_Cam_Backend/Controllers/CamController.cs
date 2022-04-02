@@ -130,7 +130,6 @@ namespace Home_Cam_Backend.Controllers
                         // if no more image near the selected time
                         if (imageInfoList[currList].Count == 0)
                         {
-                            await Response.Body.WriteAsync(Encoding.ASCII.GetBytes("No more recordings."));
                             return;
                         }
                     }
@@ -164,7 +163,6 @@ namespace Home_Cam_Backend.Controllers
                     // if no more image near the selected time
                     if (imageInfoList[currList].Count == 0)
                     {
-                        // Console.WriteLine("Exiting");
                         return;
                     }
 

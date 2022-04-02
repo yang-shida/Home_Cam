@@ -83,3 +83,30 @@ mat-slider {
     width: 50%;
     min-width: 200px;
 }
+
+.playback-control-container{
+    display: flex;
+    align-items: center;
+    column-gap: 2%;
+}
+
+.playback-progress-bar {
+    border: 1px solid;
+    border-radius: 5px;
+    width: 95%;
+    height: 5vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.available-regions{
+    background-color: aqua;
+    position: absolute;
+    height: 100%;
+}
+
+.play-pause-icon{
+    max-width: 5%;
+    width: 5vh;
+    height: auto;
+}

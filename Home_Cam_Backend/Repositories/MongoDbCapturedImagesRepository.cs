@@ -189,11 +189,11 @@ namespace Home_Cam_Backend.Repositories
                 {
                     if (findingStart)
                     {
-                        res.Add(new() { Start = doc[i].CreatedDate, End = doc[i].CreatedDate });
+                        res.Add(new() { Start = doc[i].CreatedDate.ToUnixTimeMilliseconds(), End = doc[i].CreatedDate.ToUnixTimeMilliseconds() });
                     }
                     else
                     {
-                        res.Add(new() { Start = currStart, End = doc[i].CreatedDate });
+                        res.Add(new() { Start = currStart.ToUnixTimeMilliseconds(), End = doc[i].CreatedDate.ToUnixTimeMilliseconds() });
                     }
                 }
                 else
@@ -208,7 +208,7 @@ namespace Home_Cam_Backend.Repositories
                     {
                         if (doc[i].CreatedDate.ToUnixTimeMilliseconds() - currEnd.ToUnixTimeMilliseconds() > thresholdMillis)
                         {
-                            res.Add(new() { Start = currStart, End = currEnd });
+                            res.Add(new() { Start = currStart.ToUnixTimeMilliseconds(), End = currEnd.ToUnixTimeMilliseconds() });
                             currStart = doc[i].CreatedDate;
                             currEnd = currStart;
                             findingStart = false;

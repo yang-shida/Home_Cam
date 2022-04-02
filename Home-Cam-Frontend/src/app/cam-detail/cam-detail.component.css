@@ -103,10 +103,19 @@ mat-slider {
     background-color: aqua;
     position: absolute;
     height: 100%;
+    pointer-events: none;
 }
 
 .play-pause-icon{
     max-width: 5%;
     width: 5vh;
     height: auto;
+}
+
+.played-region{
+    background-color: rgba(255, 255, 0, 0.3);
+    border-right: 2px solid rgba(255, 153, 0, 0.685);
+    left: 0%;
+    position: absolute;
+    height: 100%;
 }

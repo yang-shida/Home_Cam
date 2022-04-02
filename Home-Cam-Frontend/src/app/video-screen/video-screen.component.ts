@@ -15,18 +15,20 @@ export class VideoScreenComponent implements OnInit {
   @Input() camId: string = "N/A";
   @Input() startTime: number = -1;
   @Output() currFrameTimeSinceStartMs: EventEmitter<number> = new EventEmitter();
-  @Output() streamFinished: EventEmitter<boolean> = new EventEmitter();
+  @Output() streamFinished: EventEmitter<number> = new EventEmitter();
   videoUrl: SafeUrl = "";
-
-  isPlaying: boolean = true;
 
   videoFrameSubscription?: Subscription;
   camListSubscription?: Subscription;
 
+  isPlaying: boolean = true;
+
+  lastReceivedFrameTimeSinceStartMs: number = 0;
+
   constructor(private cameraServices: CameraService, private domSanitizer: DomSanitizer) {
     this.camListSubscription = this.cameraServices.onLocalCamListUpdate().subscribe(
       newCamList => {
-        if (this.videoFrameSubscription==null && this.cameraServices.isCamActive(this.camId)) {
+        if (this.startTime != 0 && this.videoFrameSubscription==null && this.cameraServices.isCamActive(this.camId)) {
           this.videoFrameSubscription = this.cameraServices.connentVideo(this.camId, this.startTime == -1 ? null : this.startTime).subscribe(
             data => {
               this.frameProcessingFunction(data)
@@ -34,7 +36,7 @@ export class VideoScreenComponent implements OnInit {
           );
         }
         else {
-          this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl("../../assets/cam_not_active.jpg");
+          this.videoUrl = this.startTime==0?this.domSanitizer.bypassSecurityTrustUrl("../../assets/missing_image.jpg"):this.domSanitizer.bypassSecurityTrustUrl("../../assets/cam_not_active.jpg");
         }
       }
     )
@@ -46,7 +48,7 @@ export class VideoScreenComponent implements OnInit {
   ngOnChanges(): void {
     // console.log("change", this.camId, this.startTime, this.videoFrameSubscription == null)
     this.videoFrameSubscription == null ? "" : this.videoFrameSubscription.unsubscribe();
-    if (this.cameraServices.isCamActive(this.camId) || this.startTime != -1) {
+    if (this.startTime != 0 && (this.cameraServices.isCamActive(this.camId) || this.startTime != -1)) {
       this.videoFrameSubscription = this.cameraServices.connentVideo(this.camId, this.startTime == -1 ? null : this.startTime).subscribe(
         data => {
           this.frameProcessingFunction(data)
@@ -54,7 +56,7 @@ export class VideoScreenComponent implements OnInit {
       );
     }
     else {
-      this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl("../../assets/cam_not_active.jpg");
+      this.videoUrl = this.startTime==0?this.domSanitizer.bypassSecurityTrustUrl("../../assets/missing_image.jpg"):this.domSanitizer.bypassSecurityTrustUrl("../../assets/cam_not_active.jpg");
     }
 
   }
@@ -62,7 +64,7 @@ export class VideoScreenComponent implements OnInit {
   frameProcessingFunction = (data: string) => {
     if(data=="Stream Finished!"){
       this.videoFrameSubscription == null ? "" : this.videoFrameSubscription.unsubscribe();
-      this.streamFinished==null?"":this.streamFinished.emit(true);
+      this.streamFinished==null?"":this.streamFinished.emit(this.lastReceivedFrameTimeSinceStartMs);
       return;
     }
     if(this.startTime==-1)
@@ -74,6 +76,7 @@ export class VideoScreenComponent implements OnInit {
       let frame: ControlledFrame = JSON.parse(data)
       this.videoUrl = this.domSanitizer.bypassSecurityTrustUrl(`data:image/jpeg;base64, ${frame.ImageBase64Str}`);
       this.currFrameTimeSinceStartMs.emit(frame.TimeSinceStartMs);
+      this.lastReceivedFrameTimeSinceStartMs = frame.TimeSinceStartMs;
     }
   }
 

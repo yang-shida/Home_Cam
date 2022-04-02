@@ -1,6 +1,6 @@
 <div [style.--video-screen-size]="videoWidth+'%'">
 
-    <mat-tab-group class="live-playback-tab" mat-align-tabs="center" selectedIndex="1">
+    <mat-tab-group class="live-playback-tab" mat-align-tabs="center">
 
         <mat-tab label="Live" #LiveTag>
             <div class="live-playback-tab-container">
@@ -21,7 +21,7 @@
             <div class="live-playback-tab-container">
                 <div class="cam-detail-page-content">
                     <div class="video-screen-container">
-                        <app-video-screen *ngIf="PlaybackTag.isActive" camId={{camId}} [startTime]="1648433812040"></app-video-screen>
+                        <app-video-screen *ngIf="PlaybackTag.isActive" camId={{camId}} [startTime]="currStartTimeMs" (currFrameTimeSinceStartMs)="onVideoPlayProgressUpdate($event)" (streamFinished)="onCurrentIntervalFinishChange($event)"></app-video-screen>
                     </div>
                     <div class="video-size-slider-container">
                         <p>Video Size</p>
@@ -36,14 +36,15 @@
                         <mat-datepicker #picker disabled="false"></mat-datepicker>
                     </mat-form-field>
                     <div class="playback-control-container">
-                        <img class="play-pause-icon" src={{playPauseIconUrl}} (click)="onPlayPauseButtonClick()">
+                        <img class="play-pause-icon" src={{isPlaying?pauseIconUrl:playIconUrl}} (click)="onPlayPauseButtonClick()">
                         <div class="playback-progress-bar" (click)="onMouseUp($event)" (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)">
                             <div class="available-regions" *ngFor="let interval of pickedDateTimeIntervals"  [style]="'left:'+timeMarkToPercent(interval.Start)+'; width: '+intervalToPercent(interval)+';'"></div>
-                            <!-- [style]="'left: '+timeMarkToPercent(interval.Start)+'%;'+'width: '+intervalToPercent(interval)+'%;'" -->
+                            <div class="played-region" [style]="'width: '+percentage+';'"></div>
                         </div>
                     </div>
                     
                 </div>
+                <div>{{getCurrentPlayingTime()}}</div>
             </div>
         </mat-tab>
         <mat-tab label="Setting">

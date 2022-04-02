@@ -18,6 +18,9 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatSliderModule} from '@angular/material/slider';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+
 
 
 
@@ -31,6 +34,7 @@ import { CamDetailComponent } from './cam-detail/cam-detail.component';
 import { GeneralSettingComponent } from './general-setting/general-setting.component';
 import { EnterPwdDialogComponent } from './enter-pwd-dialog/enter-pwd-dialog.component';
 import { AskForRebootDialogComponent } from './ask-for-reboot-dialog/ask-for-reboot-dialog.component';
+import { MatNativeDateModule } from '@angular/material/core';
 
 const appRoutes: Routes = [
   {path: 'card-view', component: CameraCardListComponent},
@@ -75,6 +79,9 @@ const appRoutes: Routes = [
     MatDialogModule,
     MatTabsModule,
     MatSliderModule,
+    MatSlideToggleModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   providers: [],
   bootstrap: [AppComponent]

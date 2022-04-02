@@ -1,38 +1,113 @@
 <div [style.--video-screen-size]="videoWidth+'%'">
-    
+
     <mat-tab-group class="live-playback-tab" mat-align-tabs="center">
 
-            <mat-tab label="Live">
-                <div class="live-playback-tab-container">
-                    <div class="cam-detail-page-content">
-                        <div class="video-screen-container">
-                            <app-video-screen camId={{camId}}></app-video-screen>
+        <mat-tab label="Live" #LiveTag>
+            <div class="live-playback-tab-container">
+                <div class="cam-detail-page-content">
+                    <div class="video-screen-container">
+                        <app-video-screen *ngIf="LiveTag.isActive" camId={{camId}}></app-video-screen>
+                    </div>
+                </div>
+            </div>
+            <div class="video-size-slider-container">
+                <p>Video Size</p>
+                <mat-slider thumbLabel [value]="videoWidth" (input)="videoWidthSliderChange($event)" min="1" max="100"
+                    vertical="true" [displayWith]="videoWidthSliderDisplayFormat"></mat-slider>
+            </div>
+
+        </mat-tab>
+        <mat-tab label="Playback" #PlaybackTag>
+            <div class="live-playback-tab-container">
+                <div class="cam-detail-page-content">
+                    <div class="video-screen-container">
+                        <app-video-screen *ngIf="PlaybackTag.isActive" camId={{camId}} [startTime]="currStartTimeMs" (currFrameTimeSinceStartMs)="onVideoPlayProgressUpdate($event)" (streamFinished)="onCurrentIntervalFinishChange($event)"></app-video-screen>
+                    </div>
+                    <div class="video-size-slider-container">
+                        <p>Video Size</p>
+                        <mat-slider thumbLabel [value]="videoWidth" (input)="videoWidthSliderChange($event)" min="1" max="100"
+                            vertical="true" [displayWith]="videoWidthSliderDisplayFormat"></mat-slider>
+                    </div>
+                    <mat-form-field class="date-picker" appearance="fill">
+                        <mat-label>Choose a date</mat-label>
+                        <input matInput [matDatepickerFilter]="myFilter" [matDatepicker]="picker"
+                            [(ngModel)]="pickedDate" disabled (dateChange)="onPickedDateChange($event)">
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker disabled="false"></mat-datepicker>
+                    </mat-form-field>
+                    <div class="playback-control-container">
+                        <img class="play-pause-icon" src={{isPlaying?pauseIconUrl:playIconUrl}} (click)="onPlayPauseButtonClick()">
+                        <div class="playback-progress-bar" (click)="onMouseUp($event)" (mousedown)="onMouseDown($event)" (mousemove)="onMouseMove($event)">
+                            <div class="available-regions" *ngFor="let interval of pickedDateTimeIntervals"  [style]="'left:'+timeMarkToPercent(interval.Start)+'; width: '+intervalToPercent(interval)+';'"></div>
+                            <div class="played-region" [style]="'width: '+percentage+';'"></div>
                         </div>
                     </div>
+                    
                 </div>
-                <div class="video-size-slider-container">
-                    <p>Video Size</p>
-                    <mat-slider thumbLabel [value]="videoWidth" (input)="videoWidthSliderChange($event)" min="1" max="100" vertical="true" [displayWith]="videoWidthSliderDisplayFormat" ></mat-slider>
-                </div>
-                
-            </mat-tab>
-            <mat-tab label="Playback"> 
-                <div class="live-playback-tab-container">
-                    <div class="cam-detail-page-content">
-                        Content 2
+                <div>{{getCurrentPlayingTime()}}</div>
+            </div>
+        </mat-tab>
+        <mat-tab label="Setting">
+            <div class="live-playback-tab-container">
+                <div class="cam-detail-page-content">
+                    <div class="setting-line">
+                        <div class="setting-label">UniqueId</div>
+                        <div class="setting-control">
+                            <input type="text" [value]="camSetting==null?'N/A':camSetting.UniqueId" readonly>
+                        </div>
+                    </div>
+                    <div class="setting-line">
+                        <div class="setting-label">Location</div>
+                        <div class="setting-control">
+                            <input type="text" [(ngModel)]="camSetting==null?'N/A':camSetting.Location">
+                        </div>
+                    </div>
+                    <div class="setting-line">
+                        <div class="setting-label">FrameSize</div>
+                        <div class="setting-control">
+                            <select id="framesize" [(ngModel)]="camSetting==null?6:camSetting.FrameSize"
+                                class="default-action">
+                                <option value="10">UXGA(1600x1200)</option>
+                                <option value="9">SXGA(1280x1024)</option>
+                                <option value="8">XGA(1024x768)</option>
+                                <option value="7">SVGA(800x600)</option>
+                                <option value="6">VGA(640x480)</option>
+                                <option value="5">CIF(400x296)</option>
+                                <option value="4">QVGA(320x240)</option>
+                                <option value="3">HQVGA(240x176)</option>
+                                <option value="0">QQVGA(160x120)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-line">
+                        <div class="setting-label">FlashLightOn</div>
+                        <div class="setting-control">
+                            <mat-slide-toggle [(ngModel)]="camSetting==null?0:camSetting.FlashLightOn">
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
+                    <div class="setting-line">
+                        <div class="setting-label">HorizontalMirror</div>
+                        <div class="setting-control">
+                            <mat-slide-toggle [(ngModel)]="camSetting==null?0:camSetting.HorizontalMirror">
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
+                    <div class="setting-line">
+                        <div class="setting-label">VerticalMirror</div>
+                        <div class="setting-control">
+                            <mat-slide-toggle [(ngModel)]="camSetting==null?0:camSetting.VerticalMirror">
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
+                    <div class="setting-line">
+                        <button mat-flat-button color="primary" (click)="onChangeSetting()">Update Setting</button>
+                        <mat-spinner *ngIf="submissionLoading" diameter="20" color="accent"></mat-spinner>
                     </div>
                 </div>
-            </mat-tab>
-            <mat-tab label="Setting"> 
-                <div class="live-playback-tab-container">
-                    <div class="cam-detail-page-content">
-                        Content 2
-                    </div>
-                </div>
-            </mat-tab>
-        
+            </div>
+        </mat-tab>
+
     </mat-tab-group>
-    
+
 </div>
-
-

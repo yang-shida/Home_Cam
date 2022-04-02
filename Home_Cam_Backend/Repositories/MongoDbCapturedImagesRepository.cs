@@ -124,7 +124,7 @@ namespace Home_Cam_Backend.Repositories
             return doc!=null?doc.CreatedDate:DateTimeOffset.MinValue;
         }
 
-        public async Task<List<TimeIntervalDto>> GetRecordedTimeIntervals(string camId, long startTimeUtc, long timeLengthMillis, long thresholdMillis)
+        public async Task<List<TimeIntervalDto>> GetRecordedTimeIntervals(string camId, long? startTimeUtc, long? timeLengthMillis, long thresholdMillis)
         {
             var match = new BsonDocument
                                 {
@@ -134,11 +134,17 @@ namespace Home_Cam_Backend.Repositories
                                         {
                                             {
                                                 "$and",
+                                                startTimeUtc == null || timeLengthMillis == null?
+                                                new BsonArray
+                                                {
+                                                    new BsonDocument {{"CamId",new BsonDocument {{"$eq", camId}}}}
+                                                }
+                                                :
                                                 new BsonArray
                                                 {
                                                     new BsonDocument {{"CamId",new BsonDocument {{"$eq", camId}}}},
-                                                    new BsonDocument {{"CreatedDate.0",new BsonDocument {{"$gte", DateTimeOffset.FromUnixTimeMilliseconds(startTimeUtc).Ticks}}}},
-                                                    new BsonDocument {{"CreatedDate.0",new BsonDocument {{"$lt", DateTimeOffset.FromUnixTimeMilliseconds(startTimeUtc+timeLengthMillis).Ticks}}}}
+                                                    new BsonDocument {{"CreatedDate.0",new BsonDocument {{"$gte", DateTimeOffset.FromUnixTimeMilliseconds((long)startTimeUtc).Ticks}}}},
+                                                    new BsonDocument {{"CreatedDate.0",new BsonDocument {{"$lt", DateTimeOffset.FromUnixTimeMilliseconds((long)startTimeUtc+(long)timeLengthMillis).Ticks}}}}
                                                 }
                                             }
                                         }
@@ -183,11 +189,11 @@ namespace Home_Cam_Backend.Repositories
                 {
                     if (findingStart)
                     {
-                        res.Add(new() { Start = doc[i].CreatedDate, End = doc[i].CreatedDate });
+                        res.Add(new() { Start = doc[i].CreatedDate.ToUnixTimeMilliseconds(), End = doc[i].CreatedDate.ToUnixTimeMilliseconds() });
                     }
                     else
                     {
-                        res.Add(new() { Start = currStart, End = doc[i].CreatedDate });
+                        res.Add(new() { Start = currStart.ToUnixTimeMilliseconds(), End = doc[i].CreatedDate.ToUnixTimeMilliseconds() });
                     }
                 }
                 else
@@ -202,7 +208,7 @@ namespace Home_Cam_Backend.Repositories
                     {
                         if (doc[i].CreatedDate.ToUnixTimeMilliseconds() - currEnd.ToUnixTimeMilliseconds() > thresholdMillis)
                         {
-                            res.Add(new() { Start = currStart, End = currEnd });
+                            res.Add(new() { Start = currStart.ToUnixTimeMilliseconds(), End = currEnd.ToUnixTimeMilliseconds() });
                             currStart = doc[i].CreatedDate;
                             currEnd = currStart;
                             findingStart = false;

@@ -1,1 +1,9 @@
-<img [src]="videoUrl" alt="Video streaming from camera {{camId}}" onerror="src='../../assets/missing_image.jpg'">
+<div class="container">
+    <img [src]="videoUrl" alt="Video streaming from camera {{camId}}" onerror="src='../../assets/missing_image.jpg'">
+    <div *ngIf="startTime==0" class="pause-cover">
+        <div class="pause-text">
+            Video Paused
+        </div>
+        
+    </div>
+</div>

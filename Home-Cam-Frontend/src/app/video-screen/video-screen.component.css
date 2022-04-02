@@ -2,3 +2,26 @@ img{
     width: 100%;
     height: auto;
 }
+
+.container{
+    height: fit-content;
+    width: fit-content;
+    position: relative;
+}
+
+.pause-cover{
+    background-color: rgba(255,255,255, 0.9);
+    position: absolute;
+    left: 0%;
+    top: 0%;
+    right: 0%;
+    bottom: 0%;
+}
+
+.pause-text{
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+    font-size: 150%;
+}

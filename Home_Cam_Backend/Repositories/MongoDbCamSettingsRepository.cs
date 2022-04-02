@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Home_Cam_Backend.Entities;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Home_Cam_Backend.Repositories
@@ -22,11 +26,6 @@ namespace Home_Cam_Backend.Repositories
             await camSettingsCollection.InsertOneAsync(setting);
         }
 
-        // public async Task DeleteCamSettingAsync(string camId)
-        // {
-        //     throw new System.NotImplementedException();
-        // }
-
         public async Task<EEsp32CamSetting> GetCamSettingAsync(string camId)
         {
             var filter = camSettingFilterBuilder.Eq(existingCamSetting => existingCamSetting.UniqueId, camId);
@@ -37,6 +36,34 @@ namespace Home_Cam_Backend.Repositories
         {
             var filter = camSettingFilterBuilder.Eq(existingCamSetting => existingCamSetting.UniqueId, setting.UniqueId);
             await camSettingsCollection.ReplaceOneAsync(filter, setting);
+        }
+
+        public async Task<List<string>> GetCurrentCamIds()
+        {
+            var project = new BsonDocument
+                            {
+                                {
+                                    "$project", new BsonDocument
+                                        {
+                                            {
+                                                "UniqueId", 1
+                                            },
+                                            {
+                                                "_id", 0
+                                            }
+                                        }
+                                }
+                            };
+            var pipeline = new[] { project };
+            var doc = await (await camSettingsCollection.AggregateAsync<BsonDocument>(pipeline)).ToListAsync();
+
+            var docItems = doc.Select(
+                docItem => {
+                    return (string)docItem["UniqueId"];
+                }
+            );
+            
+            return docItems.ToList();
         }
     }
 }

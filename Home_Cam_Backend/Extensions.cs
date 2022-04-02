@@ -34,6 +34,7 @@ namespace Home_Cam_Backend
         public static (string gatewayAddress, string subnetMask) getGatewayAddressAndSubnetMask()
         {
             string gatewayAddress="", subnetMask="";
+            bool hasValidNetwork = false;
             foreach (NetworkInterface f in NetworkInterface.GetAllNetworkInterfaces())  
             {  
                 IPInterfaceProperties ipInterface = f.GetIPProperties(); 
@@ -48,15 +49,17 @@ namespace Home_Cam_Backend
                     {
                         if(unicastAddress.Address.AddressFamily.ToString()=="InterNetwork")
                         {
+                            hasValidNetwork = true;
                             subnetMask=unicastAddress.IPv4Mask.ToString();
-                        }
-                        else
-                        {
-                            Console.WriteLine("Stop finding camera. Not in IPv4 network.");
-                            subnetMask="N/A";
                         }
                     }
                 }
+            }
+            if(!hasValidNetwork)
+            {
+                Console.WriteLine("Stop finding camera. Not in IPv4 network.");
+                gatewayAddress="N/A";
+                subnetMask="N/A";
             }  
             return (gatewayAddress: gatewayAddress, subnetMask: subnetMask);
         }

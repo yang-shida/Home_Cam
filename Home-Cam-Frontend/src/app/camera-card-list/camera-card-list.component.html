@@ -1,6 +1,6 @@
 <div id="cam-list-page-container">
     <div id="cam-list-container" *ngIf="completeCamIdList.length>0">
-        <app-camera-card *ngFor="let camId of camIdList" [camId]="camId"></app-camera-card>
+        <app-camera-card *ngFor="let camId of camIdList" [camId]="camId" (click)="onClickCamCard(camId)" [routerLink]="'/cam-detail/'+camId"></app-camera-card>
         <div class="floating-elements">
             <button mat-flat-button color="primary" id="floating-refresh-button" (click)="onRefresh()">Discover Cameras</button>
             <mat-slide-toggle [checked]="showInactiveCam" (change)="onShowInactiveCamSliderChange($event)">Show All Cameras</mat-slide-toggle>

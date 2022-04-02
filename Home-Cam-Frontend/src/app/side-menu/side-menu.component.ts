@@ -37,6 +37,14 @@ export class SideMenuComponent implements OnInit {
     this.selectedMenuItemSubscription = this.sideBarSelectionServices.onSelectedMenuItemUpdate().subscribe(
       item => {
         this.selectedMenuItem = item;
+        if (item === 'Cameras') {
+          this.toggleShowCamIdList();
+        }
+        else {
+          if (this.showingCamIdList) {
+            this.toggleShowCamIdList();
+          }
+        }
       }
     )
     this.selectedCameraSubscription = this.sideBarSelectionServices.onSelectedCamUpdate().subscribe(
@@ -58,15 +66,6 @@ export class SideMenuComponent implements OnInit {
 
   onClickMenuItem(menuItem: string): void {
     this.sideBarSelectionServices.selectMenuItem(menuItem);
-
-    if (menuItem === 'Cameras') {
-      this.toggleShowCamIdList();
-    }
-    else {
-      if (this.showingCamIdList) {
-        this.toggleShowCamIdList();
-      }
-    }
   }
 
   onClickCamId(camId: string): void {

@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Subscription } from 'rxjs';
 import { CameraService } from '../camera.service';
+import { SideBarSelectionService } from '../side-bar-selection.service';
 import { UiService } from '../ui.service';
 
 @Component({
@@ -24,7 +25,7 @@ export class CctvViewComponent implements OnInit {
 
   private localCamListSubscription: Subscription;
 
-  constructor(private cameraServices: CameraService, private uiService: UiService) {
+  constructor(private sideBarSelectionServices: SideBarSelectionService, private cameraServices: CameraService, private uiService: UiService) {
     this.localCamListSubscription = this.cameraServices.onLocalCamListUpdate().subscribe(
       camInfoList => {
         if (camInfoList.length == 1 && camInfoList[0].IpAddr == 'N/A') {
@@ -73,6 +74,11 @@ export class CctvViewComponent implements OnInit {
     else {
       this.camIdList = this.completeCamIdList;
     }
+  }
+
+  onClickCamCard(camId: string): void {
+    this.sideBarSelectionServices.selectMenuItem('Cameras');
+    this.sideBarSelectionServices.selectCamera(camId);
   }
 
 }

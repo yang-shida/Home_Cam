@@ -164,7 +164,7 @@ export class CamDetailComponent implements OnInit {
     this.isDown = false;
 
     let percentNum: number = Number(this.percentage.substring(0, this.percentage.length - 1));
-    console.log(percentNum)
+    // console.log(percentNum)
     let selectedTimeMark: number = Math.round(percentNum / 100 * 1000 * 3600 * 24 + this.pickedDate!.getTime());
     let insideIntervalIndex: number = this.pickedDateTimeIntervals.findIndex(int => int.Start < selectedTimeMark && int.End > selectedTimeMark);
     let nextIntervalIndex: number = this.pickedDateTimeIntervals.findIndex(int => int.Start > selectedTimeMark);

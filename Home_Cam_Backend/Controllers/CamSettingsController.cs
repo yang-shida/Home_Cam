@@ -24,6 +24,8 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{uniqueId}")]
         public async Task<ActionResult<CamSettingDto>> GetCamSettingAsync(string uniqueId, string ipAddr = null, long? camTime = null)
         {
+            uniqueId = uniqueId.restoreMacAddr();
+
             // request comes from a camera, add it to ActiveCameras list if is not in the list
             if (ipAddr is not null && camTime is not null)
             {

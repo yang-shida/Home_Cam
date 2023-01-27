@@ -6,7 +6,7 @@
         <form *ngIf="settingFormIsOpen" class="setting-form" [formGroup]="updateSettingForm"
             (ngSubmit)="onUpdateSetting()">
             <mat-form-field appearance="fill">
-                <mat-label for="max-space">Max storage space (GBs) [int, 1-50]</mat-label>
+                <mat-label for="max-space">Max storage space (GBs) [int, 1-400]</mat-label>
                 <input matInput type="text" formControlName="MaxSpaceGBs">
             </mat-form-field>
             <div class="form-validation-warning" *ngIf="updateSettingForm.get('MaxSpaceGBs')?.errors?.['required']">

@@ -31,38 +31,38 @@ namespace Home_Cam_Backend
             configuration=_configuration;
         }
 
-        public static (string gatewayAddress, string subnetMask) getGatewayAddressAndSubnetMask()
-        {
-            string gatewayAddress="", subnetMask="";
-            bool hasValidNetwork = false;
-            foreach (NetworkInterface f in NetworkInterface.GetAllNetworkInterfaces())  
-            {  
-                IPInterfaceProperties ipInterface = f.GetIPProperties(); 
-                var gatewayAddresses = ipInterface.GatewayAddresses;
-                var unicastAddresses = ipInterface.UnicastAddresses;
-                if(gatewayAddresses.Count>0)
-                {
-                    gatewayAddress=gatewayAddresses[0].Address.AddressFamily.ToString()=="InterNetwork"?
-                                    gatewayAddresses[0].Address.ToString():
-                                    "N/A";
-                    foreach(var unicastAddress in unicastAddresses)
-                    {
-                        if(unicastAddress.Address.AddressFamily.ToString()=="InterNetwork")
-                        {
-                            hasValidNetwork = true;
-                            subnetMask=unicastAddress.IPv4Mask.ToString();
-                        }
-                    }
-                }
-            }
-            if(!hasValidNetwork)
-            {
-                Console.WriteLine("Stop finding camera. Not in IPv4 network.");
-                gatewayAddress="N/A";
-                subnetMask="N/A";
-            }  
-            return (gatewayAddress: gatewayAddress, subnetMask: subnetMask);
-        }
+        // public static (string gatewayAddress, string subnetMask) getGatewayAddressAndSubnetMask()
+        // {
+        //     string gatewayAddress="", subnetMask="";
+        //     bool hasValidNetwork = false;
+        //     foreach (NetworkInterface f in NetworkInterface.GetAllNetworkInterfaces())  
+        //     {  
+        //         IPInterfaceProperties ipInterface = f.GetIPProperties(); 
+        //         var gatewayAddresses = ipInterface.GatewayAddresses;
+        //         var unicastAddresses = ipInterface.UnicastAddresses;
+        //         if(gatewayAddresses.Count>0)
+        //         {
+        //             gatewayAddress=gatewayAddresses[0].Address.AddressFamily.ToString()=="InterNetwork"?
+        //                             gatewayAddresses[0].Address.ToString():
+        //                             "N/A";
+        //             foreach(var unicastAddress in unicastAddresses)
+        //             {
+        //                 if(unicastAddress.Address.AddressFamily.ToString()=="InterNetwork")
+        //                 {
+        //                     hasValidNetwork = true;
+        //                     subnetMask=unicastAddress.IPv4Mask.ToString();
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     if(!hasValidNetwork)
+        //     {
+        //         Console.WriteLine("Stop finding camera. Not in IPv4 network.");
+        //         gatewayAddress="N/A";
+        //         subnetMask="N/A";
+        //     }  
+        //     return (gatewayAddress: gatewayAddress, subnetMask: subnetMask);
+        // }
 
         public static int[] ipAddrToOcts(string ipAddress)
         {
@@ -81,7 +81,9 @@ namespace Home_Cam_Backend
         {
             List<string> ipList = new();
 
-            (string gatewayAddress, string subnetMask) = getGatewayAddressAndSubnetMask();
+            // (string gatewayAddress, string subnetMask) = getGatewayAddressAndSubnetMask();
+            string gatewayAddress = configuration.GetSection("FindCamIPRangeSettings").GetValue<string>("GatewayAddress");
+            string subnetMask = configuration.GetSection("FindCamIPRangeSettings").GetValue<string>("SubnetMask");
 
             if(gatewayAddress=="N/A" || subnetMask=="N/A"){
                 return Task.FromResult(ipList);
@@ -177,6 +179,14 @@ namespace Home_Cam_Backend
                                 .Where(x=>x%2==0)
                                 .Select(x=>Convert.ToByte(hex.Substring(x,2), 16))
                                 .ToArray();
+        }
+
+        public static string restoreMacAddr(this string mac) {
+            if(mac.Length!=12){
+                throw new Exception($"[restoreMacAddr] Invalid input MAC address: {mac}");
+            }
+
+            return Regex.Replace(mac, @"(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})", @"$1:$2:$3:$4:$5:$6");
         }
     }
 }

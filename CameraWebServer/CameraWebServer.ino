@@ -1,3 +1,6 @@
+#include <ArduinoJson.h>
+#include <ArduinoJson.hpp>
+
 #include <WiFi.h>
 #include "esp_camera.h"
 
@@ -20,10 +23,10 @@
 
 #include "Int64String.h"
 
-const char* ssid = "TP-LINK_2C56";
-const char* password = "cici1616";
+const char* ssid = "NETGEAR98";
+const char* password = "417645885";
 
-const char* server_ip = "192.168.1.106";
+const char* server_ip = "192.168.1.2";
 const char* server_port = "8080";
 
 //const char* ssid = "YANG";

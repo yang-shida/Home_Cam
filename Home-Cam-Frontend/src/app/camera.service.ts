@@ -26,6 +26,10 @@ export class CameraService {
     this.lastLocalCamListUpdateTime = Date.now() - (this.localCamListRefreshPeriodSec * 1000 + 1);
   }
 
+  removeColonFromMacAddr(mac: string): string {
+    return mac.replace(/\:/g, "");
+  }
+
   // camera services
   onLocalCamListUpdate(): Observable<CamBasicInfo[]> {
     return this.localCamListSubject.asObservable();
@@ -102,13 +106,13 @@ export class CameraService {
   }
 
   getCameraPreviewImageUrl(camId: string): string {
-    return this.isCamActive(camId) ? `${this.cameraUrl}/${camId}/preview?cb=${Date.now()}` : "../../assets/cam_not_active.jpg";
+    return this.isCamActive(camId) ? `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}/preview?cb=${Date.now()}` : "../../assets/cam_not_active.jpg";
   }
 
   connentVideo(camId: string, startTimeUtc: number | null = null): Observable<string> {
     let fullUrl: string = startTimeUtc == null ?
-      `${this.cameraUrl}/${camId}?cb=${Date.now()}` :
-      `${this.cameraUrl}/${camId}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
+      `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}?cb=${Date.now()}` :
+      `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
 
     return new Observable<string>(
       obs => {
@@ -126,17 +130,17 @@ export class CameraService {
   }
 
   getStreamingUrl(camId: string): string {
-    return `${this.cameraUrl}/${camId}?cb=${Date.now()}`;
+    return `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}?cb=${Date.now()}`;
   }
 
   getPlaybackUrl(camId: string, startTimeUtc: number): string {
-    return `${this.cameraUrl}/${camId}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
+    return `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}?startTimeUtc=${startTimeUtc}&cb=${Date.now()}`;
   }
 
   getAvailableRecordingTimeIntervals(camId: string, start?: number, length?: number): Observable<CamTimeInterval[]> {
     const fullUrl = start == null || length == null ?
-      `${this.cameraUrl}/${camId}/available_recording_time_intervals` :
-      `${this.cameraUrl}/${camId}/available_recording_time_intervals?startTimeUtc=${Math.trunc(start)}&timeLengthMillis=${Math.trunc(length)}`;
+      `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}/available_recording_time_intervals` :
+      `${this.cameraUrl}/${this.removeColonFromMacAddr(camId)}/available_recording_time_intervals?startTimeUtc=${Math.trunc(start)}&timeLengthMillis=${Math.trunc(length)}`;
     return this.http.get<CamTimeInterval[]>(fullUrl).pipe(
       catchError(
         (err, caught) => {
@@ -156,7 +160,7 @@ export class CameraService {
 
   // camera setting services
   getCamSetting(camId: string): Observable<CamSetting> {
-    const fullUrl = `${this.cameraSettingUrl}/${camId}`;
+    const fullUrl = `${this.cameraSettingUrl}/${this.removeColonFromMacAddr(camId)}`;
     return this.http.get<CamSetting>(fullUrl).pipe(
       catchError(
         (err, caught) => {

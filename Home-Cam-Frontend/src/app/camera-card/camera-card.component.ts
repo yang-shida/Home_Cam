@@ -26,10 +26,11 @@ export class CameraCardComponent implements OnInit {
         this.camLocation = camSettings.Location;
       }
     );
-    this.onRefresh();
+    this.imageUrl = this.cameraServices.getCameraPreviewImageUrl(this.camId as string);
   }
 
-  onRefresh(): void{
+  onRefresh(event: Event): void{
+    event.stopPropagation();
     this.imageUrl = this.cameraServices.getCameraPreviewImageUrl(this.camId as string);
   }
 

@@ -35,13 +35,18 @@ import { GeneralSettingComponent } from './general-setting/general-setting.compo
 import { EnterPwdDialogComponent } from './enter-pwd-dialog/enter-pwd-dialog.component';
 import { AskForRebootDialogComponent } from './ask-for-reboot-dialog/ask-for-reboot-dialog.component';
 import { MatNativeDateModule } from '@angular/material/core';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 
 const appRoutes: Routes = [
   {path: 'card-view', component: CameraCardListComponent},
   {path: '', redirectTo: '/card-view', pathMatch: 'full'},
   {path: 'cctv-view', component: CctvViewComponent},
   {path: 'cam-detail', component: CamDetailComponent, children: [{path: ':camId', component: CamDetailComponent}]},
-  {path: 'backend-control', component: GeneralSettingComponent}
+  {path: 'backend-control', component: GeneralSettingComponent},
+  {
+    path: "**",
+    component: PageNotFoundComponent
+  }
 ]
 
 

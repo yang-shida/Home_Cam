@@ -60,8 +60,12 @@ namespace Home_Cam_Backend.Repositories
                                 }
                             };
             var pipeline = new[] { group };
-            var doc = await (await capturedImageInfoCollection.AggregateAsync<BsonDocument>(pipeline)).SingleAsync();
-            return doc["TotalSize"].AsInt64;
+            var doc = await (await capturedImageInfoCollection.AggregateAsync<BsonDocument>(pipeline)).SingleOrDefaultAsync() ?? new BsonDocument
+                                        {
+                                            {"_id", BsonNull.Value},
+                                            {"TotalSize", 0}
+                                        };
+            return doc["TotalSize"].ToInt64();
         }
 
         public async Task<List<ECapturedImageInfo>> GetOldestN(int N)

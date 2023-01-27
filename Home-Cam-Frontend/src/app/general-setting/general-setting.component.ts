@@ -17,7 +17,7 @@ export class GeneralSettingComponent implements OnInit {
 
   updateSettingForm = new FormGroup(
     {
-      MaxSpaceGBs: new FormControl('', [Validators.required, Validators.pattern("^[0-9]*$"), Validators.max(50), Validators.min(1)]),
+      MaxSpaceGBs: new FormControl('', [Validators.required, Validators.pattern("^[0-9]*$"), Validators.max(400), Validators.min(1)]),
       PercentToDeleteWhenFull: new FormControl('', [Validators.required, Validators.pattern("^[0-9]*$"), Validators.max(90), Validators.min(5)]),
       SearchCamerasMinutes: new FormControl('', [Validators.required, Validators.pattern("^[0-9]*$"), Validators.max(60), Validators.min(1)]),
       ImageStorageSizeControlMinutes: new FormControl('', [Validators.required, Validators.pattern("^[0-9]*$"), Validators.max(30), Validators.min(1)]),

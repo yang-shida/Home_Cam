@@ -70,6 +70,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{camId}")]
         public async Task Streaming(string camId, long? startTimeUtc = null)
         {
+            camId = camId.restoreMacAddr();
 
             var response = Response;
             response.Headers.Add("Content-Type", "text/event-stream");
@@ -202,6 +203,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{camId}/preview")]
         public async Task<ActionResult> GetPreviewImage(string camId)
         {
+            camId = camId.restoreMacAddr();
 
             int camIndex = ActiveCameras.FindIndex(camInList => camInList.UniqueId == camId);
 
@@ -226,6 +228,7 @@ namespace Home_Cam_Backend.Controllers
         [HttpGet("{camId}/available_recording_time_intervals")]
         public async Task<ActionResult<List<TimeIntervalDto>>> GetAvailableRecordingTimeIntervals(string camId, long? startTimeUtc, long? timeLengthMillis)
         {
+            camId = camId.restoreMacAddr();
             long thresholdMillis = configuration.GetSection("CamControllerSettings").GetValue<long>("DistinctVideosThresholdSeconds") * 1000;
             List<TimeIntervalDto> timeIntervals = await capturedImagesRepository.GetRecordedTimeIntervals(camId, startTimeUtc, timeLengthMillis, thresholdMillis);
             return timeIntervals;
